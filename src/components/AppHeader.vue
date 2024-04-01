@@ -24,7 +24,7 @@
         <div class="d-sm-none">
           <v-btn icon="mdi-magnify"></v-btn>
 
-          <v-menu bottom left>
+          <v-menu bottom left transition="fade-transition">
             <template v-slot:activator="{ props }">
               <v-btn v-bind="props" icon="mdi-dots-vertical"></v-btn>
             </template>
@@ -43,7 +43,7 @@
   </header>
 </template>
 
-<script>
+<script lang="ts">
 export default {
   name: 'AppHeader',
   data() {
