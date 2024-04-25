@@ -11,7 +11,10 @@
   },
   "dependencies": {
     "@mdi/font": "6.2.95",
+    "axios": "^1.6.8",
     "core-js": "^3.34.0",
+    "js-cookie": "^3.0.5",
+    "mavon-editor": "^3.0.1",
     "roboto-fontface": "*",
     "vue": "^3.4.21",
     "vue3-markdown-it": "^1.0.10",
@@ -21,6 +24,7 @@
     "@babel/types": "^7.24.0",
     "@commitlint/cli": "^19.2.1",
     "@commitlint/config-conventional": "^19.1.0",
+    "@types/js-cookie": "^3.0.6",
     "@types/node": "^20.11.25",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vue/eslint-config-typescript": "^13.0.0",

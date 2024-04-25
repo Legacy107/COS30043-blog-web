@@ -69,7 +69,6 @@ export default {
   },
   computed: {
     url() {
-      console.log(this)
       return `/post/${this?.id}`
     },
   },
