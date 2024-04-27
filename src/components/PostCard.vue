@@ -9,24 +9,58 @@
           :variant="isHovering ? 'elevated' : 'flat'"
           class="cursor-pointer"
         >
-          <div class="d-flex flex-no-wrap justify-space-between">
+          <div
+            class="d-flex flex-no-wrap justify-space-between flex-column flex-sm-row"
+          >
             <div>
-              <div class="d-flex align-center">
-                <v-avatar class="ma-3" size="24">
-                  <v-img :src="avatarUrl"></v-img>
-                </v-avatar>
-                <span>{{ author }}</span>
-              </div>
-              <v-card-title class="text-h5">{{ title }}</v-card-title>
+              <v-hover>
+                <template v-slot:default="{ isHovering, props }">
+                  <router-link
+                    v-if="showAuthor"
+                    :to="`/user/${id}`"
+                    class="text-white text-decoration-none"
+                  >
+                    <div
+                      v-bind="props"
+                      :class="
+                        'd-flex align-center ' +
+                        (isHovering
+                          ? 'text-decoration-underline'
+                          : 'text-decoration-none')
+                      "
+                    >
+                      <v-avatar class="ma-3" size="24">
+                        <v-img :src="avatarUrl"></v-img>
+                      </v-avatar>
+                      <span>{{ author }}</span>
+                    </div>
+                  </router-link>
+                </template>
+              </v-hover>
+              <v-card-title :class="`text-h5 ${!showAuthor ? 'mt-2' : ''}`">{{
+                title
+              }}</v-card-title>
 
               <v-card-subtitle>{{ date }}</v-card-subtitle>
 
               <v-card-text>{{ description }}</v-card-text>
             </div>
 
-            <v-avatar class="ma-2 align-self-center" rounded size="175">
+            <v-avatar
+              class="ma-2 align-self-center d-none d-sm-block"
+              rounded
+              size="175"
+            >
               <v-img :src="imageUrl"></v-img>
             </v-avatar>
+            <v-img
+              :src="imageUrl"
+              class="ma-4 d-sm-none"
+              height="200"
+              width="calc(100% - 32px)"
+              cover
+              rounded
+            ></v-img>
           </div>
         </v-card>
       </a>
@@ -38,6 +72,10 @@
 export default {
   name: 'PostCard',
   props: {
+    showAuthor: {
+      type: Boolean,
+      default: true,
+    },
     id: {
       type: Number,
       required: true,

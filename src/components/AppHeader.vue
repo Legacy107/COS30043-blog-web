@@ -30,7 +30,7 @@
 
         <div class="d-sm-none">
           <v-btn icon="mdi-magnify" v-on:click="test"></v-btn>
-          <v-menu bottom left transition="fade-transition">
+          <v-menu transition="fade-transition">
             <template v-slot:activator="{ props }">
               <v-btn v-bind="props" icon="mdi-dots-vertical"></v-btn>
             </template>
@@ -66,8 +66,8 @@ const publicMenu = [
   { title: 'Sign In', link: '/auth/login', color: 'white' },
   { title: 'Get Started', link: '/auth/signup', color: 'primary' },
 ]
-const privateMenu = [
-  { title: 'Profile', link: '/profile', color: 'white' },
+const privateMenu = (id: string) => [
+  { title: 'Profile', link: `/user/${id}`, color: 'white' },
   { title: 'New Post', link: '/post/create', color: 'primary' },
 ]
 
@@ -93,7 +93,7 @@ export default {
     ...mapStores(useAppStore),
     ...mapState(useAppStore, ['user', 'authenticated']),
     menu() {
-      return this.authenticated ? privateMenu : publicMenu
+      return this.authenticated ? privateMenu(this.user?.id ?? '') : publicMenu
     },
   },
 }

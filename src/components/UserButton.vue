@@ -1,5 +1,5 @@
 <template>
-  <v-menu v-if="!!user" bottom left transition="fade-transition">
+  <v-menu v-if="!!user" transition="fade-transition">
     <template v-slot:activator="{ props }">
       <v-btn icon v-bind="props">
         <v-avatar size="36" color="primary">

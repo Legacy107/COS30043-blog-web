@@ -4,4 +4,6 @@ export type User = {
   firstname: string
   lastname: string
   avatar: string
+  bio: string
+  followers?: number
 }
