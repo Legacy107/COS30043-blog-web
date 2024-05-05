@@ -1,7 +1,7 @@
+require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
 const connection = require('./dbconnection')
-require('dotenv').config()
 const authenticateToken = require('./middleware/authMiddleware')
 const authRoutes = require('./routes/auth')
 

@@ -4,7 +4,8 @@ import { User } from '../@types/user'
 
 export const useAppStore = defineStore('app', {
   state: () => {
-    const user = JSON.parse(Cookies.get('user') || '{}') ?? null
+    const userString = Cookies.get('user')
+    const user = userString && JSON.parse(userString)
     return {
       user,
     } as {

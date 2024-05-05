@@ -1,8 +1,11 @@
 <template>
   <v-container class="my-10">
     <v-row>
-      <v-col cols="8">
+      <v-col cols="12" sm="8">
         <v-row>
+          <v-col cols="12">
+            <FilterPost />
+          </v-col>
           <v-data-iterator :items="items" :page="page">
             <template v-slot:default="{ items }">
               <template v-for="(item, i) in items" :key="i">
@@ -22,8 +25,8 @@
           </v-data-iterator>
         </v-row>
       </v-col>
-      <v-col cols="4">
-        <!-- Content for the 3-column section -->
+      <v-col cols="0" sm="4">
+        <RecommendationSidebar />
       </v-col>
     </v-row>
   </v-container>
@@ -31,6 +34,9 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
+import PostCard from '@/components/PostCard.vue'
+import RecommendationSidebar from '@/components/RecommendationSidebar.vue'
+import FilterPost from '@/components/FilterPost.vue'
 
 const page = ref(1)
 const items = ref([

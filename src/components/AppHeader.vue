@@ -8,6 +8,7 @@
           >Logo</a
         >
       </v-app-bar-title>
+
       <v-text-field
         class="search-bar d-none d-sm-block mr-md-auto mr-3"
         placeholder="Search"
@@ -16,7 +17,11 @@
         flat
         hide-details="false"
         variant="outlined"
-      ></v-text-field>
+      >
+        <v-menu open-on-click activator="parent" open-on-focus>
+          <SearchResult />
+        </v-menu>
+      </v-text-field>
 
       <template v-slot:append>
         <a
@@ -61,6 +66,7 @@
 import { useAppStore } from '../stores/app'
 import { mapState, mapStores } from 'pinia'
 import UserButton from './UserButton.vue'
+import SearchResult from './SearchResult.vue'
 
 const publicMenu = [
   { title: 'Sign In', link: '/auth/login', color: 'white' },
@@ -75,6 +81,7 @@ export default {
   name: 'AppHeader',
   components: {
     UserButton,
+    SearchResult,
   },
   data() {
     return {

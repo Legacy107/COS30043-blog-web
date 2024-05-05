@@ -4,7 +4,11 @@
       {{ noLikes }}
       <v-tooltip activator="parent" location="top">Like</v-tooltip>
     </v-btn>
-    <v-btn variant="plain" prepend-icon="mdi-comment-outline">
+    <v-btn
+      variant="plain"
+      prepend-icon="mdi-comment-outline"
+      @click="onOpenComments"
+    >
       {{ noComments }}
       <v-tooltip activator="parent" location="top">Comment</v-tooltip>
     </v-btn>
@@ -38,6 +42,9 @@ export default {
     author: {
       type: String,
       required: true,
+    },
+    onOpenComments: {
+      type: Function,
     },
   },
 }

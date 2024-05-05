@@ -16,7 +16,9 @@ router.post('/login', (req, res) => {
         const user = results[0]
         const passwordMatch = bcrypt.compareSync(password, user.password)
         if (!passwordMatch) {
-          res.status(401).json({ message: 'Invalid username or password' })
+          return res
+            .status(401)
+            .json({ message: 'Invalid username or password' })
         }
         const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET)
         delete user.password
@@ -28,7 +30,6 @@ router.post('/login', (req, res) => {
 router.post('/signup', (req, res) => {
   const { username, password, firstname, lastname } = req.body
   const hashedPassword = bcrypt.hashSync(password, 10)
-  console.log(hashedPassword.length)
   connection.query(
     'INSERT INTO user (username, password, firstname, lastname) VALUES (?, ?, ?, ?)',
     [username, hashedPassword, firstname, lastname],
