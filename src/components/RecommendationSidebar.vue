@@ -60,7 +60,7 @@
       </v-list>
     </div>
 
-    <div>
+    <div v-if="authenticated">
       <div class="text-h5 mb-2 font-weight-bold">Recommended Topics</div>
       <v-chip-group column>
         <v-chip
@@ -74,7 +74,7 @@
       </v-chip-group>
     </div>
 
-    <div>
+    <div v-if="authenticated">
       <div class="text-h5 mb-2 font-weight-bold">Recommended Authors</div>
       <v-list density="compact" bg-color="transparent" slim lines="three">
         <v-list-item
@@ -140,6 +140,9 @@
 </template>
 
 <script lang="ts">
+import { useAppStore } from '../stores/app'
+import { mapState } from 'pinia'
+
 export default {
   data: () => ({
     trendingPosts: [
@@ -291,6 +294,9 @@ export default {
       },
     ],
   }),
+  computed: {
+    ...mapState(useAppStore, ['authenticated']),
+  },
 }
 </script>
 

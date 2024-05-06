@@ -69,7 +69,7 @@ export default {
         title:
           'Post 1 Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
         description:
-          'Description for post 1 Description for post 1 Description for post 1 Description for post 1 Description for post 1 Description for post 1',
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
         content: 'Content for post 1',
         date: '2021-01-01',
         image: 'https://cdn.vuetifyjs.com/images/cards/desert.jpg',

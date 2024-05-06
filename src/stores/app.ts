@@ -16,6 +16,11 @@ export const useAppStore = defineStore('app', {
     setUser(user: User) {
       this.user = user
     },
+    logout() {
+      this.user = null
+      Cookies.remove('token')
+      Cookies.remove('user')
+    },
   },
   getters: {
     authenticated(state) {

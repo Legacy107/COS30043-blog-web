@@ -35,23 +35,24 @@
 <script lang="ts">
 import { User } from '../@types/user'
 import { defineComponent, PropType } from 'vue'
-// import Cookies from 'js-cookie'
+import { useAppStore } from '../stores/app'
+import { mapActions } from 'pinia'
 
 export default defineComponent({
   props: {
     user: {
       type: Object as PropType<User>,
-      // required: true,
+      required: true,
     },
   },
   methods: {
+    ...mapActions(useAppStore, ['logout']),
     goToAccountSettings() {
       // Add your logic to navigate to the account settings page
     },
     signOut() {
-      // Cookies.remove('token')
-      // Cookies.remove('user')
-      // this.$router.push('/')
+      this.logout()
+      this.$router.push('/')
     },
   },
 })

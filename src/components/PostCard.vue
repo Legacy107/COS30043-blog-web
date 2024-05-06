@@ -3,7 +3,7 @@
     <template v-slot:default="{ isHovering, props }">
       <a :href="url" class="text-decoration-none text-unset">
         <v-card
-          max-width="600"
+          max-width="720"
           v-bind="props"
           :color="isHovering ? 'grey-darken-3' : undefined"
           :variant="isHovering ? 'elevated' : 'flat'"
@@ -29,17 +29,25 @@
                           : 'text-decoration-none')
                       "
                     >
-                      <v-avatar class="ma-3" size="24">
-                        <v-img :src="avatarUrl"></v-img>
+                      <v-avatar class="ma-3" size="24" color="primary">
+                        <v-img
+                          v-if="avatarUrl"
+                          :src="avatarUrl"
+                          :alt="author"
+                        />
+                        <span v-else class="text-body">
+                          {{ author?.[0] }}
+                        </span>
                       </v-avatar>
                       <span>{{ author }}</span>
                     </div>
                   </router-link>
                 </template>
               </v-hover>
-              <v-card-title :class="`text-h5 ${!showAuthor ? 'mt-2' : ''}`">{{
-                title
-              }}</v-card-title>
+              <v-card-title
+                :class="`text-wrap text-h5 ${!showAuthor ? 'mt-2' : ''}`"
+                >{{ title }}</v-card-title
+              >
 
               <v-card-subtitle>{{ date }}</v-card-subtitle>
 
