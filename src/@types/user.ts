@@ -5,5 +5,5 @@ export type User = {
   lastname: string
   avatar: string
   bio: string
-  followers?: number
+  followers: number
 }

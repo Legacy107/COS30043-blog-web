@@ -2,7 +2,7 @@
   <div class="container">
     <v-row>
       <v-col cols="12">
-        <v-avatar size="100">
+        <v-avatar size="100" color="primary">
           <v-img v-if="user.avatar" :src="user.avatar" :alt="user.firstname" />
           <span v-else class="text-h5">
             {{ user.firstname?.[0] }}
@@ -145,6 +145,6 @@ export default defineComponent({
 .container {
   position: sticky;
   top: 1rem;
-  max-width: 600px;
+  max-width: 720px;
 }
 </style>

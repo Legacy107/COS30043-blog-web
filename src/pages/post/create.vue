@@ -18,6 +18,7 @@
                 variant="outlined"
                 :rules="titleRules"
               ></v-text-field>
+
               <v-text-field
                 v-model="description"
                 label="Description"
@@ -25,6 +26,7 @@
                 variant="outlined"
                 :rules="descriptionRules"
               ></v-text-field>
+
               <v-file-input
                 v-model="image"
                 accept="image/*"
@@ -33,6 +35,19 @@
                 variant="outlined"
                 :rules="imageRules"
               ></v-file-input>
+
+              <v-autocomplete
+                v-model="selectedTopics"
+                :items="topics"
+                label="Topics"
+                multiple
+                variant="outlined"
+                clearable
+                chips
+                closable-chips
+                clear-on-select
+              ></v-autocomplete>
+
               <mavon-editor
                 v-model="content"
                 language="en"
@@ -50,7 +65,7 @@
                 v-if="errorMessage"
                 type="error"
                 dismissible
-                border="left"
+                border="start"
               >
                 {{ errorMessage }}
               </v-alert>
@@ -63,9 +78,13 @@
 </template>
 
 <script lang="ts">
+import axios from '@/utils/axios'
+
 export default {
   data() {
     return {
+      topics: [],
+      selectedTopics: [],
       title: '',
       content: '# Hello World!',
       description: '',
@@ -88,6 +107,17 @@ export default {
     }
   },
   methods: {
+    async fetchTopics() {
+      try {
+        const { data } = await axios.get('/topic')
+        this.topics = data.map((topic: any) => ({
+          title: topic.name,
+          value: topic.id,
+        }))
+      } catch (error: any) {
+        this.errorMessage = error.response.data.message
+      }
+    },
     async submit(event: any) {
       try {
         this.loading = true
@@ -98,12 +128,17 @@ export default {
         formData.append('description', this.description)
         formData.append('content', this.content)
         formData.append('image', this.image[0])
+        formData.append('topics', this.selectedTopics.join(','))
+        await axios.post('/post', formData)
       } catch (error: any) {
         this.errorMessage = error.response.data.message
       } finally {
         this.loading = false
       }
     },
+  },
+  async mounted() {
+    await this.fetchTopics()
   },
 }
 </script>

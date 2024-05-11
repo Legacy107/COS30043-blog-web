@@ -5,12 +5,18 @@ const connection = require('./dbconnection')
 const authenticateToken = require('./middleware/authMiddleware')
 const authRoutes = require('./routes/auth')
 const postRoutes = require('./routes/post')
+const protectedPostRoutes = require('./routes/protected/post')
+const userRoutes = require('./routes/user')
+const topicRoutes = require('./routes/topic')
 
 const app = express()
 app.use(express.json())
 app.use(cors())
 app.use('/auth', authRoutes)
-app.use('/posts', authenticateToken, postRoutes)
+app.use('/post', postRoutes)
+app.use('/post', authenticateToken, protectedPostRoutes)
+app.use('/user', userRoutes)
+app.use('/topic', topicRoutes)
 
 app.get('/users', authenticateToken, (req, res) => {
   connection.query('SELECT * FROM user', (error, results) => {

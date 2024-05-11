@@ -6,7 +6,12 @@
           <v-col cols="12">
             <FilterPost />
           </v-col>
-          <v-infinite-scroll height="100%" :items="posts" :onLoad="fetchPosts">
+          <v-infinite-scroll
+            height="100%"
+            width="100%"
+            :items="posts"
+            :onLoad="fetchPosts"
+          >
             <template v-for="post in posts" :key="post.id">
               <v-col cols="12">
                 <PostCard
@@ -60,7 +65,7 @@ export default {
   methods: {
     async fetchPosts({ done }: { done: (status: any) => void }) {
       try {
-        const { data } = await axios.get('/posts', {
+        const { data } = await axios.get('/post', {
           params: {
             offset: this.offset,
             limit: this.limit,

@@ -94,7 +94,7 @@ export default {
       post: null,
     } as {
       openComments: boolean
-      post: null | (Post & User & { topics: string[] })
+      post: null | (Post & { author: User } & { topics: string[] })
     }
   },
   methods: {
@@ -108,12 +108,13 @@ export default {
   },
   computed: {
     id() {
-      return parseInt(this.$route.params.id ?? '0')
+      const { id } = this.$route.params as unknown as { id: string }
+      return parseInt(id ?? '0')
     },
   },
   async mounted() {
-    const id = this.$route.params.id
-    const { data } = await axios.get(`/posts/${id}`)
+    const { id } = this.$route.params as unknown as { id: string }
+    const { data } = await axios.get(`/post/${id}`)
     this.post = data
   },
 }

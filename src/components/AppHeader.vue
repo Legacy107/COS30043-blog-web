@@ -15,7 +15,7 @@
         center-affix
         density="compact"
         flat
-        hide-details="false"
+        hide-details
         variant="outlined"
       >
         <v-menu open-on-click activator="parent" open-on-focus>
@@ -30,7 +30,7 @@
           :href="item.link"
           class="text-decoration-none d-none d-sm-block"
         >
-          <v-btn text :color="item.color">{{ item.title }}</v-btn>
+          <v-btn :color="item.color">{{ item.title }}</v-btn>
         </a>
 
         <div class="d-sm-none">
