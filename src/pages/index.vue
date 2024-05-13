@@ -18,6 +18,7 @@
                   :id="post.id"
                   :avatarUrl="post.author.avatar ?? ''"
                   :author="post.author.firstname + ' ' + post.author.lastname"
+                  :authorId="post.author.id"
                   :title="post.title"
                   :description="post.description"
                   :date="formatDate(post.createAt)"
@@ -42,7 +43,6 @@ import RecommendationSidebar from '@/components/RecommendationSidebar.vue'
 import FilterPost from '@/components/FilterPost.vue'
 import { Post } from '@/@types/post'
 import { User } from '@/@types/user'
-import { useDate } from 'vuetify'
 
 export default {
   name: 'Home',
@@ -81,8 +81,7 @@ export default {
       }
     },
     formatDate(dateString: string) {
-      const date = useDate()
-      return date.format(dateString, 'fullDate')
+      return new Date(dateString).toLocaleString()
     },
   },
 }

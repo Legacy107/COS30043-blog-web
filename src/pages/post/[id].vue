@@ -17,12 +17,36 @@
             </span>
           </v-avatar>
           <div class="d-flex flex-column">
-            <span class="text-body-1 font-weight-medium">
-              {{ post.author.firstname }} {{ post.author.lastname }}
-            </span>
+            <v-hover>
+              <template v-slot:default="{ isHovering, props }">
+                <router-link
+                  :to="`/user/${post.author.id}`"
+                  class="text-white text-decoration-none"
+                >
+                  <span
+                    v-bind="props"
+                    :class="
+                      'text-body-1 font-weight-medium ' +
+                      (isHovering
+                        ? 'text-decoration-underline'
+                        : 'text-decoration-none')
+                    "
+                  >
+                    {{ post.author.firstname }} {{ post.author.lastname }}
+                  </span>
+                </router-link>
+              </template>
+            </v-hover>
             <span class="text-caption">{{ formatDate(post.createAt) }}</span>
           </div>
-          <v-btn class="ms-auto" variant="tonal">Follow</v-btn>
+          <v-btn
+            class="ms-auto"
+            color="primary"
+            :variant="followButtonVariant"
+            @click="handleFollow"
+          >
+            {{ followText }}
+          </v-btn>
         </div>
       </v-col>
       <v-col cols="12">
@@ -33,6 +57,15 @@
             :noLikes="post.likes"
             :noComments="post.comments"
             :author="post.author.firstname + ' ' + post.author.lastname"
+            :title="post.title"
+            :onOpenComments="
+              () => {
+                handleOpenComments()
+                scrollToComments()
+              }
+            "
+            :isLiked="isLiked"
+            :onLike="handleLike"
           />
           <v-divider />
         </div>
@@ -59,13 +92,16 @@
           :noLikes="post.likes"
           :noComments="post.comments"
           :author="post.author.firstname + ' ' + post.author.lastname"
+          :title="post.title"
           :onOpenComments="handleOpenComments"
+          :isLiked="isLiked"
+          :onLike="handleLike"
         />
       </v-col>
 
-      <v-col cols="12">
+      <v-col cols="12" ref="comments">
         <v-expand-transition>
-          <CommentSection v-show="openComments" />
+          <CommentSection v-show="openComments" :postId="post.id" />
         </v-expand-transition>
       </v-col>
     </v-row>
@@ -79,7 +115,8 @@ import PostAction from '@/components/PostAction.vue'
 import axios from '@/utils/axios'
 import { Post } from '@/@types/post'
 import { User } from '@/@types/user'
-import { useDate } from 'vuetify'
+import { useAppStore } from '@/stores/app'
+import { mapState } from 'pinia'
 
 export default {
   name: 'Post',
@@ -91,9 +128,13 @@ export default {
   data() {
     return {
       openComments: false,
+      isLiked: false,
+      isFollowing: false,
       post: null,
     } as {
       openComments: boolean
+      isLiked: boolean
+      isFollowing: boolean
       post: null | (Post & { author: User } & { topics: string[] })
     }
   },
@@ -101,9 +142,73 @@ export default {
     handleOpenComments() {
       this.openComments = !this.openComments
     },
+    scrollToComments() {
+      const comments = (this.$refs.comments as any).$el as HTMLElement
+      comments.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    },
     formatDate(dateString: string) {
-      const date = useDate()
-      return date.format(dateString, 'fullDate')
+      return new Date(dateString).toLocaleString()
+    },
+    async likePost() {
+      try {
+        await axios.post(`/post/${this.id}/like`)
+        this.isLiked = true
+        if (this.post) {
+          this.post.likes++
+        }
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    async unlikePost() {
+      try {
+        await axios.delete(`/post/${this.id}/like`)
+        if (this.post) {
+          this.post.likes--
+        }
+        this.isLiked = false
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    handleLike() {
+      if (this.isLiked) {
+        this.unlikePost()
+      } else {
+        this.likePost()
+      }
+    },
+    async fetchLikeStatus() {
+      try {
+        const { data } = await axios.get(`/post/${this.id}/like`)
+        this.isLiked = data.like
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    async fetchFollowing() {
+      if (!this.user) return
+      const { data } = await axios.get(`/user/${this.user?.id}/following`)
+      if (data.some((u: User) => u.id === this.post?.author.id)) {
+        this.isFollowing = true
+      }
+    },
+    async followUser() {
+      if (!this.post?.author) return
+      await axios.post(`/user/${this.post.author.id}/follow`)
+      this.isFollowing = true
+    },
+    async unfollowUser() {
+      if (!this.post?.author) return
+      await axios.delete(`/user/${this.post.author.id}/follow`)
+      this.isFollowing = false
+    },
+    handleFollow() {
+      if (this.isFollowing) {
+        this.unfollowUser()
+      } else {
+        this.followUser()
+      }
     },
   },
   computed: {
@@ -111,11 +216,21 @@ export default {
       const { id } = this.$route.params as unknown as { id: string }
       return parseInt(id ?? '0')
     },
+    followText() {
+      return this.isFollowing ? 'Following' : 'Follow'
+    },
+    followButtonVariant() {
+      return this.isFollowing ? 'elevated' : 'outlined'
+    },
+    ...mapState(useAppStore, ['user']),
   },
   async mounted() {
     const { id } = this.$route.params as unknown as { id: string }
     const { data } = await axios.get(`/post/${id}`)
     this.post = data
+
+    this.fetchFollowing()
+    this.fetchLikeStatus()
   },
 }
 </script>

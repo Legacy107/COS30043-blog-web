@@ -3,17 +3,37 @@
     <v-row>
       <v-col cols="12">
         <v-avatar size="100" color="primary">
-          <v-img v-if="user.avatar" :src="user.avatar" :alt="user.firstname" />
+          <v-img
+            v-if="userProfile.avatar"
+            :src="userProfile.avatar"
+            :alt="userProfile.firstname"
+          />
           <span v-else class="text-h5">
-            {{ user.firstname?.[0] }}
+            {{ userProfile.firstname?.[0] }}
           </span>
         </v-avatar>
       </v-col>
       <v-col cols="12">
-        <h2>{{ user.firstname }} {{ user.lastname }}</h2>
-        <p>{{ user.followers }} Followers</p>
-        <p class="my-4">{{ user.bio }}</p>
-        <v-btn color="primary" variant="outlined">Follow</v-btn>
+        <h2>{{ userProfile.firstname }} {{ userProfile.lastname }}</h2>
+        <p>{{ followers }} Followers</p>
+        <p class="my-4">{{ userProfile.bio }}</p>
+        <template v-if="user">
+          <v-btn
+            v-if="isFollowing(userProfile)"
+            color="primary"
+            @click="() => unfollowUser(userProfile)"
+          >
+            Following
+          </v-btn>
+          <v-btn
+            v-else
+            color="primary"
+            variant="outlined"
+            @click="() => followUser(userProfile)"
+          >
+            Follow
+          </v-btn>
+        </template>
       </v-col>
     </v-row>
     <div class="mt-10">
@@ -102,13 +122,26 @@
                         class="d-flex justify-space-between mt-4 pt-4 border-t-sm align-center"
                       >
                         <div>{{ followingUser.followers }} Followers</div>
-                        <v-btn
-                          color="primary"
-                          variant="outlined"
-                          size="x-small"
-                        >
-                          Follow
-                        </v-btn>
+                        <template v-if="user && followingUser.id !== user.id">
+                          <v-btn
+                            v-if="isFollowing(followingUser)"
+                            color="primary"
+                            variant="outlined"
+                            size="x-small"
+                            @click="() => unfollowUser(followingUser)"
+                          >
+                            Unfollow
+                          </v-btn>
+                          <v-btn
+                            v-else
+                            color="primary"
+                            variant="outlined"
+                            size="x-small"
+                            @click="() => followUser(followingUser)"
+                          >
+                            Follow
+                          </v-btn>
+                        </template>
                       </div>
                     </v-card-text>
                   </v-card>
@@ -123,13 +156,16 @@
 </template>
 
 <script lang="ts">
+import { useAppStore } from '@/stores/app'
+import { mapState } from 'pinia'
 import { defineComponent, PropType } from 'vue'
+import axios from '@/utils/axios'
 import { User } from '@/@types/user'
 
 export default defineComponent({
   name: 'ProfileAbout',
   props: {
-    user: {
+    userProfile: {
       type: Object as PropType<User>,
       required: true,
     },
@@ -137,6 +173,44 @@ export default defineComponent({
       type: Array as PropType<User[]>,
       required: true,
     },
+  },
+  data: () =>
+    ({
+      currentUserFollowing: [],
+      followersDelta: 0,
+    }) as { currentUserFollowing: User[]; followersDelta: number },
+  methods: {
+    async fetchFollowing() {
+      if (!this.user) return
+      const { data } = await axios.get(`/user/${this.user?.id}/following`)
+      this.currentUserFollowing = data
+    },
+    async followUser(user: User) {
+      if (!this.user) return
+      await axios.post(`/user/${user.id}/follow`)
+      this.currentUserFollowing.push(user)
+      this.followersDelta++
+    },
+    async unfollowUser(user: User) {
+      if (!this.user) return
+      await axios.delete(`/user/${user.id}/follow`)
+      this.currentUserFollowing = this.currentUserFollowing.filter(
+        (u) => u.id !== user.id,
+      )
+      this.followersDelta--
+    },
+    isFollowing(user: User) {
+      return this.currentUserFollowing.some((u) => u.id === user.id)
+    },
+  },
+  computed: {
+    followers() {
+      return this.userProfile.followers + this.followersDelta
+    },
+    ...mapState(useAppStore, ['user']),
+  },
+  mounted() {
+    this.fetchFollowing()
   },
 })
 </script>

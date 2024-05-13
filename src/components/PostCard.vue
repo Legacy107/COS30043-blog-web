@@ -17,7 +17,7 @@
                 <template v-slot:default="{ isHovering, props }">
                   <router-link
                     v-if="showAuthor"
-                    :to="`/user/${id}`"
+                    :to="`/user/${authorId}`"
                     class="text-white text-decoration-none"
                   >
                     <div
@@ -94,6 +94,10 @@ export default {
     },
     author: {
       type: String,
+      required: true,
+    },
+    authorId: {
+      type: Number,
       required: true,
     },
     title: {

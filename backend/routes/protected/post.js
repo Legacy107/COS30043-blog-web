@@ -5,6 +5,54 @@ const { Formidable } = require('formidable')
 const { put } = require('@vercel/blob')
 const { Writable } = require('stream')
 
+// CREATE TABLE `post_like` (
+//   `postId` int NOT NULL,
+//   `userId` int NOT NULL,
+//   `createAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+//   PRIMARY KEY (`postId`,`userId`),
+//   KEY `postId_idx` (`postId`),
+//   KEY `userId_idx` (`userId`),
+//   CONSTRAINT `like-postId` FOREIGN KEY (`postId`) REFERENCES `post` (`id`),
+//   CONSTRAINT `like-userId` FOREIGN KEY (`userId`) REFERENCES `user` (`id`)
+// ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+// CREATE TABLE `post` (
+//   `id` int NOT NULL AUTO_INCREMENT,
+//   `title` varchar(100) NOT NULL,
+//   `createAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+//   `description` varchar(300) NOT NULL,
+//   `content` mediumtext NOT NULL,
+//   `userId` int NOT NULL,
+//   `likes` int NOT NULL DEFAULT '0',
+//   `comments` int NOT NULL DEFAULT '0',
+//   PRIMARY KEY (`id`),
+//   KEY `post-userId_idx` (`userId`),
+//   CONSTRAINT `post-userId` FOREIGN KEY (`userId`) REFERENCES `user` (`id`)
+// ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+// CREATE TABLE `comment` (
+//   `id` int NOT NULL AUTO_INCREMENT,
+//   `postId` int NOT NULL,
+//   `userId` int NOT NULL,
+//   `createAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+//   `likes` int NOT NULL DEFAULT '0',
+//   PRIMARY KEY (`id`),
+//   KEY `postId_idx` (`postId`),
+//   KEY `userId_idx` (`userId`),
+//   CONSTRAINT `comment-postId` FOREIGN KEY (`postId`) REFERENCES `post` (`id`),
+//   CONSTRAINT `comment-userId` FOREIGN KEY (`userId`) REFERENCES `user` (`id`)
+// ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+// CREATE TABLE `comment_like` (
+//   `commentId` int NOT NULL,
+//   `userId` int NOT NULL,
+//   `createAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+//   PRIMARY KEY (`commentId`,`userId`),
+//   KEY `comment_like_userId_idx` (`userId`),
+//   CONSTRAINT `comment_like_commentId` FOREIGN KEY (`commentId`) REFERENCES `comment` (`id`),
+//   CONSTRAINT `comment_like_userId` FOREIGN KEY (`userId`) REFERENCES `user` (`id`)
+// ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 const fileConsumer = (acc) => {
   const writable = new Writable({
     write: (chunk, _enc, next) => {
@@ -81,6 +129,124 @@ router.post('/', async (req, res) => {
   }
 
   res.status(201).json(post)
+})
+
+router.post('/:id/like', async (req, res) => {
+  const postId = req.params.id
+
+  await new Promise((resolve, reject) => {
+    connection.query(
+      `INSERT INTO post_like (postId, userId) VALUES (${postId}, ${req.userId})`,
+      (err, results) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(results)
+        }
+      },
+    )
+  })
+
+  await new Promise((resolve, reject) => {
+    connection.query(
+      `UPDATE post SET likes = likes + 1 WHERE id=${postId}`,
+      (err, results) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(results)
+        }
+      },
+    )
+  })
+
+  res.status(201).json({ message: 'Post liked' })
+})
+
+router.get('/:id/like', async (req, res) => {
+  // get like from this user
+  const postId = req.params.id
+  const like = await new Promise((resolve, reject) => {
+    connection.query(
+      `SELECT * FROM post_like WHERE postId=${postId} AND userId=${req.userId}`,
+      (err, results) => {
+        if (err) {
+          reject(err)
+        } else {
+          if (results.length === 0) {
+            resolve(false)
+          } else resolve(true)
+        }
+      },
+    )
+  })
+
+  res.status(200).json({ like })
+})
+
+router.delete('/:id/like', async (req, res) => {
+  const postId = req.params.id
+
+  await new Promise((resolve, reject) => {
+    connection.query(
+      `DELETE FROM post_like WHERE postId=${postId} AND userId=${req.userId}`,
+      (err, results) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(results)
+        }
+      },
+    )
+  })
+
+  await new Promise((resolve, reject) => {
+    connection.query(
+      `UPDATE post SET likes = likes - 1 WHERE id=${postId}`,
+      (err, results) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(results)
+        }
+      },
+    )
+  })
+
+  res.status(200).json({ message: 'Post unliked' })
+})
+
+router.post('/:id/comment', async (req, res) => {
+  const postId = req.params.id
+  const { content } = req.body
+
+  await new Promise((resolve, reject) => {
+    connection.query(
+      `INSERT INTO comment (postId, userId, content) VALUES (${postId}, ${req.userId}, '${content}')`,
+      (err, results) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(results)
+        }
+      },
+    )
+  })
+
+  await new Promise((resolve, reject) => {
+    connection.query(
+      `UPDATE post SET comments = comments + 1 WHERE id=${postId}`,
+      (err, results) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(results)
+        }
+      },
+    )
+  })
+
+  res.status(201).json({ message: 'Comment added' })
 })
 
 module.exports = router

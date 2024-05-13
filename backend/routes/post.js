@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const connection = require('../dbconnection')
+const tokenMiddleware = require('../middleware/tokenMiddleware')
 
 // CREATE TABLE `post` (
 //   `id` int NOT NULL AUTO_INCREMENT,
@@ -236,6 +237,87 @@ router.get('/:id', async (req, res) => {
     console.error(error)
     res.status(500).json({ message: 'Internal server error' })
   }
+})
+
+router.get('/:id/comments', tokenMiddleware, async (req, res) => {
+  const postId = req.params.id
+  const { sort } = req.query
+
+  const sortQuery =
+    sort === 'Newest'
+      ? 'ORDER BY createAt DESC'
+      : sort === 'Oldest'
+        ? 'ORDER BY createAt ASC'
+        : 'ORDER BY likes DESC'
+
+  const comments = await new Promise((resolve, reject) => {
+    connection.query(
+      `SELECT * FROM comment WHERE postId=${postId} ${sortQuery}`,
+      (err, results) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(results)
+        }
+      },
+    )
+  })
+
+  // populate the user field in the comments
+  const userIds = comments.map((post) => post.userId)
+  const users = userIds.length
+    ? await new Promise((resolve, reject) => {
+        connection.query(
+          `SELECT * FROM user WHERE id IN (${userIds.map((id) => `${id}`).join(', ')})`,
+          (err, results) => {
+            if (err) {
+              reject(err)
+            } else {
+              resolve(results)
+            }
+          },
+        )
+      })
+    : []
+  const userMap = users.reduce((acc, user) => {
+    acc[user.id] = user
+    return acc
+  }, {})
+  comments.forEach((comment) => {
+    comment.user = userMap[comment.userId]
+  })
+
+  // populate the isLikes field in the comments
+  if (req.userId) {
+    const commentIds = comments.map((comment) => comment.id)
+    const likes = commentIds.length
+      ? await new Promise((resolve, reject) => {
+          connection.query(
+            `SELECT * FROM comment_like WHERE commentId IN (${commentIds.map((id) => `${id}`).join(', ')}) AND userId=${req.userId}`,
+            (err, results) => {
+              if (err) {
+                reject(err)
+              } else {
+                resolve(results)
+              }
+            },
+          )
+        })
+      : []
+    const likeMap = likes.reduce((acc, like) => {
+      acc[like.commentId] = true
+      return acc
+    }, {})
+    comments.forEach((comment) => {
+      comment.liked = likeMap[comment.id] ? true : false
+    })
+  } else {
+    comments.forEach((comment) => {
+      comment.liked = false
+    })
+  }
+
+  res.status(200).json(comments)
 })
 
 module.exports = router

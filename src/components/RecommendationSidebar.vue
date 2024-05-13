@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex w-100 flex-column ga-8 root">
+  <div class="w-100 mb-8">
     <div>
       <div class="text-h5 mb-2 font-weight-bold">Trending Posts</div>
       <v-list lines="two" density="comfortable" bg-color="transparent">
@@ -18,13 +18,13 @@
                 "
               >
                 <div class="d-flex ga-2 align-center">
-                  <v-avatar size="20">
+                  <v-avatar size="20" color="primary">
                     <v-img
                       v-if="post.author.avatar"
                       :src="post.author.avatar"
                       :alt="post.author.firstname"
                     />
-                    <span v-else class="text-h5">
+                    <span v-else class="text-body">
                       {{ post.author.firstname?.[0] }}
                     </span>
                   </v-avatar>
@@ -59,7 +59,9 @@
         </v-list-item>
       </v-list>
     </div>
+  </div>
 
+  <div class="d-flex w-100 flex-column ga-8 sticky-top">
     <div v-if="authenticated">
       <div class="text-h5 mb-2 font-weight-bold">Recommended Topics</div>
       <v-chip-group column>
@@ -69,7 +71,7 @@
           color="primary"
           size="large"
         >
-          {{ topic.title }}
+          {{ topic.name }}
         </v-chip>
       </v-chip-group>
     </div>
@@ -92,7 +94,7 @@
                   :src="user.avatar"
                   :alt="user.firstname"
                 />
-                <span v-else class="text-body">
+                <span v-else class="text-h6">
                   {{ user.firstname?.[0] }}
                 </span>
               </v-avatar>
@@ -142,166 +144,61 @@
 <script lang="ts">
 import { useAppStore } from '../stores/app'
 import { mapState } from 'pinia'
+import axios from '@/utils/axios'
+import { User } from '@/@types/user'
+import { Post } from '@/@types/post'
+import { Topic } from '@/@types/topic'
 
 export default {
-  data: () => ({
-    trendingPosts: [
-      {
-        id: 1,
-        title:
-          'Post 1 Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        description:
-          'Description for post 1 Description for post 1 Description for post 1 Description for post 1 Description for post 1 Description for post 1',
-        content: 'Content for post 1',
-        date: '2021-01-01',
-        image: 'https://cdn.vuetifyjs.com/images/cards/desert.jpg',
-        author: {
-          id: 1,
-          username: 'johndoe',
-          firstname: 'John',
-          lastname: 'Doe',
-          avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg',
-          bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        },
-      },
-      {
-        id: 2,
-        title:
-          'Post 2 Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        description: 'Description for post 2',
-        content: 'Content for post 2',
-        date: '2021-01-02',
-        image: 'https://cdn.vuetifyjs.com/images/cards/road.jpg',
-        author: {
-          id: 1,
-          username: 'johndoe',
-          firstname: 'John',
-          lastname: 'Doe',
-          avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg',
-          bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        },
-      },
-      {
-        id: 3,
-        title:
-          'Post 3 Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        description: 'Description for post 3',
-        content: 'Content for post 3',
-        date: '2021-01-03',
-        image: 'https://cdn.vuetifyjs.com/images/cards/road.jpg',
-        author: {
-          id: 1,
-          username: 'johndoe',
-          firstname: 'John',
-          lastname: 'Doe',
-          avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg',
-          bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        },
-      },
-      {
-        id: 4,
-        title:
-          'Post 4 Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        description: 'Description for post 4',
-        content: 'Content for post 4',
-        date: '2021-01-04',
-        image: 'https://cdn.vuetifyjs.com/images/cards/forest.jpg',
-        author: {
-          id: 1,
-          username: 'johndoe',
-          firstname: 'John',
-          lastname: 'Doe',
-          avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg',
-          bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        },
-      },
-      {
-        id: 5,
-        title:
-          'Post 5 Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        description: 'Description for post 5',
-        content: 'Content for post 5',
-        date: '2021-01-05',
-        image: 'https://cdn.vuetifyjs.com/images/cards/mountain.jpg',
-        author: {
-          id: 1,
-          username: 'johndoe',
-          firstname: 'John',
-          lastname: 'Doe',
-          avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg',
-          bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        },
-      },
-    ],
-    recommendedTopics: [
-      {
-        id: 1,
-        title: 'Topic 1',
-      },
-      {
-        id: 2,
-        title: 'Topic 2',
-      },
-      {
-        id: 3,
-        title: 'Topic 3',
-      },
-      {
-        id: 4,
-        title: 'Topic 4',
-      },
-      {
-        id: 5,
-        title: 'Topic 5',
-      },
-      {
-        id: 6,
-        title: 'Topic 6',
-      },
-      {
-        id: 7,
-        title: 'Topic 7',
-      },
-      {
-        id: 8,
-        title: 'Topic 8',
-      },
-    ],
-    recommendedAuthors: [
-      {
-        id: 1,
-        username: 'johndoe',
-        firstname: 'John',
-        lastname: 'Doe',
-        avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg',
-        bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-      },
-      {
-        id: 2,
-        username: 'janedoe',
-        firstname: 'Jane',
-        lastname: 'Doe',
-        avatar: 'https://cdn.vuetifyjs.com/images/lists/3.jpg',
-        bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-      },
-      {
-        id: 3,
-        username: 'johndoejr',
-        firstname: 'John',
-        lastname: 'Doe Jr.',
-        avatar: 'https://cdn.vuetifyjs.com/images/lists/2.jpg',
-        bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-      },
-    ],
-  }),
+  data: () =>
+    ({
+      trendingPosts: [],
+      recommendedTopics: [],
+      recommendedAuthors: [],
+    }) as {
+      trendingPosts: Array<Post & { author: User }>
+      recommendedTopics: Topic[]
+      recommendedAuthors: User[]
+    },
   computed: {
-    ...mapState(useAppStore, ['authenticated']),
+    ...mapState(useAppStore, ['user', 'authenticated']),
+  },
+  methods: {
+    async fetchTrendingPosts() {
+      try {
+        const { data } = await axios.get('/recommendation/posts')
+        this.trendingPosts = data
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    async fetchRecommendedTopics() {
+      try {
+        const { data } = await axios.get('/recommendation/topics')
+        this.recommendedTopics = data
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    async fetchRecommendedAuthors() {
+      try {
+        const { data } = await axios.get('/recommendation/users')
+        this.recommendedAuthors = data
+      } catch (error) {
+        console.error(error)
+      }
+    },
+  },
+  mounted() {
+    this.fetchTrendingPosts()
+    this.fetchRecommendedTopics()
+    this.fetchRecommendedAuthors()
   },
 }
 </script>
 
 <style scoped>
-.root {
+.sticky-top {
   position: sticky;
   top: 2rem;
 }
