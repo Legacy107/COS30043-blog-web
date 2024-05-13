@@ -70,6 +70,7 @@
           :key="topic.id"
           color="primary"
           size="large"
+          :href="`/?topics=${topic.name}`"
         >
           {{ topic.name }}
         </v-chip>

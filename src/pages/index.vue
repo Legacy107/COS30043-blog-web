@@ -110,6 +110,11 @@ export default {
       this.posts = []
     },
   },
+  mounted() {
+    const topics = this.$route.query.topics
+    if (typeof topics === 'string')
+      this.selectedTopics = topics ? topics.split(',') : []
+  },
 }
 </script>
 

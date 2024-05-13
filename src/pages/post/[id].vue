@@ -81,6 +81,7 @@
             :key="i"
             class="ma-1"
             color="primary"
+            :href="`/?topics=${topic}`"
           >
             {{ topic }}
           </v-chip>
