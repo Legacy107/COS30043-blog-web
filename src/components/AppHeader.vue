@@ -10,6 +10,7 @@
       </v-app-bar-title>
 
       <v-text-field
+        v-model="search"
         class="search-bar d-none d-sm-block mr-md-auto mr-3"
         placeholder="Search"
         center-affix
@@ -19,7 +20,13 @@
         variant="outlined"
       >
         <v-menu open-on-click activator="parent" open-on-focus>
-          <SearchResult />
+          <SearchResult
+            v-if="search.length > 1"
+            :loading="searchLoading"
+            :posts="searchPosts"
+            :users="searchUsers"
+            :topics="searchTopics"
+          />
         </v-menu>
       </v-text-field>
 
@@ -34,7 +41,7 @@
         </a>
 
         <div class="d-sm-none">
-          <v-btn icon="mdi-magnify" v-on:click="test"></v-btn>
+          <v-btn icon="mdi-magnify" v-on:click="openSearch"></v-btn>
           <v-menu transition="fade-transition">
             <template v-slot:activator="{ props }">
               <v-btn v-bind="props" icon="mdi-dots-vertical"></v-btn>
@@ -67,6 +74,10 @@ import { useAppStore } from '../stores/app'
 import { mapState, mapStores } from 'pinia'
 import UserButton from './UserButton.vue'
 import SearchResult from './SearchResult.vue'
+import axios from '@/utils/axios'
+import { Post } from '@/@types/post'
+import { User } from '@/@types/user'
+import { Topic } from '@/@types/topic'
 
 const publicMenu = [
   { title: 'Sign In', link: '/auth/login', color: 'white' },
@@ -86,21 +97,73 @@ export default {
   data() {
     return {
       openMenu: false,
+      search: '',
+      searchPosts: [],
+      searchTopics: [],
+      searchUsers: [],
+      searchTimeout: null,
+      searchLoading: false,
+    } as {
+      openMenu: boolean
+      search: string
+      searchPosts: Post[]
+      searchTopics: Topic[]
+      searchUsers: User[]
+      searchTimeout: any
+      searchLoading: boolean
     }
   },
   methods: {
     handleOpenMenu() {
       this.openMenu = !this.openMenu
     },
-    test() {
-      console.log('test', this.user)
+    openSearch() {},
+    async fetchSearchPosts() {
+      const { data } = await axios.get(
+        `/post?search=${this.search}&limit=5&sort=Newest`,
+      )
+      this.searchPosts = data
+    },
+    async fetchSearchTopics() {
+      const { data } = await axios.get(`/topic?search=${this.search}&limit=5`)
+      this.searchTopics = data
+    },
+    async fetchSearchUsers() {
+      const { data } = await axios.get(`/user?search=${this.search}&limit=5`)
+      this.searchUsers = data
+    },
+    async handleSearch() {
+      if (this.search.length < 2) {
+        this.searchPosts = []
+        this.searchTopics = []
+        this.searchUsers = []
+        return
+      }
+      try {
+        this.searchLoading = true
+        await this.fetchSearchPosts()
+        await this.fetchSearchUsers()
+        await this.fetchSearchTopics()
+      } catch (error) {
+        console.error(error)
+      } finally {
+        this.searchLoading = false
+      }
     },
   },
   computed: {
     ...mapStores(useAppStore),
     ...mapState(useAppStore, ['user', 'authenticated']),
     menu() {
-      return this.authenticated ? privateMenu(this.user?.id ?? '') : publicMenu
+      return this.authenticated
+        ? privateMenu(`${this.user?.id ?? ''}`)
+        : publicMenu
+    },
+  },
+  watch: {
+    search() {
+      if (this.searchTimeout) clearTimeout(this.searchTimeout)
+      this.searchTimeout = setTimeout(this.handleSearch, 500)
     },
   },
 }

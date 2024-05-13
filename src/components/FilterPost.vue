@@ -2,7 +2,7 @@
   <v-row>
     <v-col cols="12" sm="3">
       <v-select
-        v-model="filterBy"
+        v-model="filter"
         :items="filterOptions"
         label="Filter by"
         variant="outlined"
@@ -13,8 +13,8 @@
 
     <v-col cols="12" sm="6">
       <v-autocomplete
-        v-model="selectedTopics"
-        :items="topics"
+        v-model="topics"
+        :items="availableTopics"
         label="Filter by Topics"
         multiple
         variant="outlined"
@@ -29,7 +29,7 @@
 
     <v-col cols="12" sm="3">
       <v-select
-        v-model="sortBy"
+        v-model="sort"
         :items="sortOptions"
         label="Sort By"
         variant="outlined"
@@ -40,53 +40,73 @@
   </v-row>
 </template>
 
-<script>
+<script lang="ts">
+import axios from '@/utils/axios'
+import { Topic } from '@/@types/topic'
+
 export default {
+  props: {
+    sortBy: {
+      type: String,
+      default: 'Newest',
+    },
+    selectedTopics: {
+      type: Array,
+      required: true,
+      default: () => [],
+    },
+    filterBy: {
+      type: String,
+      required: true,
+      default: 'All',
+    },
+  },
+  emits: ['update:sortBy', 'update:selectedTopics', 'update:filterBy'],
   data() {
     return {
-      sortBy: 'Newest',
       sortOptions: ['Newest', 'Most viewed', 'Most liked'],
-      selectedTopics: [],
-      topics: [
-        'topic1',
-        'topic2',
-        'topic3',
-        'topic4',
-        'topic5',
-        'topic6',
-        'topic7',
-        'topic8',
-        'topic9',
-      ],
-      filterBy: 'All',
+      availableTopics: [],
       filterOptions: ['All', 'Following'],
-      posts: [],
     }
   },
   computed: {
-    filteredPosts() {
-      let filteredPosts = this.posts
-
-      if (this.selectedTopics.length > 0) {
-        filteredPosts = filteredPosts.filter((post) => {
-          return this.selectedTopics.includes(post.topic)
-        })
-      }
-
-      if (this.sortBy === 'newest') {
-        filteredPosts.sort((a, b) => b.date - a.date)
-      } else if (this.sortBy === 'most viewed') {
-        filteredPosts.sort((a, b) => b.views - a.views)
-      } else if (this.sortBy === 'most liked') {
-        filteredPosts.sort((a, b) => b.likes - a.likes)
-      }
-
-      if (this.filterBy === 'following') {
-        filteredPosts = filteredPosts.filter((post) => post.following)
-      }
-
-      return filteredPosts
+    topics: {
+      get() {
+        return this.selectedTopics
+      },
+      set(value: string[]) {
+        this.$emit('update:selectedTopics', value)
+      },
     },
+    sort: {
+      get() {
+        return this.sortBy
+      },
+      set(value: string) {
+        this.$emit('update:sortBy', value)
+      },
+    },
+    filter: {
+      get() {
+        return this.filterBy
+      },
+      set(value: string) {
+        this.$emit('update:filterBy', value)
+      },
+    },
+  },
+  methods: {
+    async fetchTopics() {
+      try {
+        const { data } = await axios.get('/topic')
+        this.availableTopics = data.map((topic: Topic) => topic.name)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+  },
+  mounted() {
+    this.fetchTopics()
   },
 }
 </script>

@@ -9,7 +9,7 @@
       >
         <ProfileAbout
           v-if="user && following"
-          :user="user"
+          :userProfile="user"
           :followers="user.followers"
           :following="following"
         />
@@ -28,13 +28,10 @@
             <template v-for="post in posts" :key="post.id">
               <v-col cols="12">
                 <PostCard
-                  :id="post.id"
+                  :post="post"
                   :avatarUrl="user.avatar ?? ''"
                   :author="user.firstname + ' ' + user.lastname"
-                  :title="post.title"
-                  :description="post.description"
-                  :date="formatDate(post.createAt)"
-                  :imageUrl="post.image ?? ''"
+                  :authorId="user.id"
                 />
               </v-col>
             </template>
@@ -51,7 +48,6 @@ import ProfileAbout from '@/components/ProfileAbout.vue'
 import axios from '@/utils/axios'
 import { User } from '@/@types/user'
 import { Post } from '@/@types/post'
-import { useDate } from 'vuetify'
 
 export default {
   name: 'Profile',
@@ -93,19 +89,15 @@ export default {
         done('error')
       }
     },
-    formatDate(dateString: string) {
-      const date = useDate()
-      return date.format(dateString, 'fullDate')
-    },
-    async fetchUser(id: string) {
+    async fetchUser(id: number) {
       const { data } = await axios.get(`/user/${id}`)
       this.user = data
     },
-    async fetchFollowing(id: string) {
+    async fetchFollowing(id: number) {
       const { data } = await axios.get(`/user/${id}/following`)
       this.following = data
     },
-    async fetchData(id: string) {
+    async fetchData(id: number) {
       this.fetchUser(id)
       this.fetchFollowing(id)
     },
@@ -117,8 +109,7 @@ export default {
     },
   },
   mounted() {
-    const { id } = this.$route.params as unknown as { id: string }
-    this.fetchData(id)
+    this.fetchData(this.id)
   },
   watch: {
     id(newId) {

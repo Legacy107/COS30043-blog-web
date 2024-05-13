@@ -11,14 +11,21 @@ const connection = require('../dbconnection')
 
 router.get('/', async (req, res) => {
   try {
+    const { search, limit } = req.query
+    const searchQuery = search?.length ? `WHERE name LIKE '%${search}%'` : ''
+    const limitQuery = limit ? `LIMIT ${limit}` : ''
+
     const topics = await new Promise((resolve, reject) => {
-      connection.query('SELECT * FROM topic', (error, results) => {
-        if (error) {
-          reject(error)
-        } else {
-          resolve(results)
-        }
-      })
+      connection.query(
+        `SELECT * FROM topic ${searchQuery} ORDER BY name ASC ${limitQuery}`,
+        (error, results) => {
+          if (error) {
+            reject(error)
+          } else {
+            resolve(results)
+          }
+        },
+      )
     })
 
     res.status(200).json(topics)

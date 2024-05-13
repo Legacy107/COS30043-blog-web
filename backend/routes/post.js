@@ -36,41 +36,37 @@ const tokenMiddleware = require('../middleware/tokenMiddleware')
 //   CONSTRAINT `post_topic_topicId` FOREIGN KEY (`topicId`) REFERENCES `topic` (`id`)
 // ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-router.get('/', async (req, res) => {
+router.get('/', tokenMiddleware, async (req, res) => {
   try {
-    const {
-      search,
-      offset = 0,
-      limit = 10,
-      following,
-      sort,
-      userId,
-    } = req.query
+    const { search, offset = 0, limit = 10, sort, userId } = req.query
     const searchQuery = search ? `title LIKE '%${search}%'` : ''
     const topics = req.query.topics ? req.query.topics.split(',') : []
-    const followingTopicIds = !following
-      ? []
-      : (
-          await new Promise((resolve, reject) => {
-            connection.query(
-              `SELECT topicId FROM user_topic WHERE userId = ${req.userId}`,
-              (err, results) => {
-                if (err) {
-                  reject(err)
-                } else {
-                  resolve(results)
-                }
-              },
-            )
-          })
-        ).map((topic) => topic.topicId)
+
+    const following = req.userId ? req.query.following === 'true' : false
+    const followingTopicIds =
+      !following || following === 'false'
+        ? []
+        : (
+            await new Promise((resolve, reject) => {
+              connection.query(
+                `SELECT topicId FROM user_topic WHERE userId = ${req.userId}`,
+                (err, results) => {
+                  if (err) {
+                    reject(err)
+                  } else {
+                    resolve(results)
+                  }
+                },
+              )
+            })
+          ).map((topic) => topic.topicId)
 
     const topicIds = !topics.length
       ? []
       : (
           await new Promise((resolve, reject) => {
             connection.query(
-              `SELECT id FROM topic WHERE name IN (${topics.map((topic) => `${topic}`).join(', ')})`,
+              `SELECT id FROM topic WHERE name IN (${topics.map((topic) => `"${topic}"`).join(', ')})`,
               (err, results) => {
                 if (err) {
                   reject(err)
@@ -103,7 +99,7 @@ router.get('/', async (req, res) => {
               },
             )
           })
-        ).map((topic) => topic.topicId)
+        ).map((user) => user.userId)
     if (userId) {
       followingUserIds.push(userId)
     }

@@ -46,29 +46,39 @@
               </v-hover>
               <v-card-title
                 :class="`text-wrap text-h5 ${!showAuthor ? 'mt-2' : ''}`"
-                >{{ title }}</v-card-title
+                >{{ post.title }}</v-card-title
               >
 
-              <v-card-subtitle>{{ date }}</v-card-subtitle>
+              <v-card-subtitle
+                class="d-inline-flex ga-1 justify-center align-center ga-5"
+              >
+                {{ formatDate(post.createAt) }}
+                <span>
+                  <v-icon size="small" color="primary">mdi-heart</v-icon>
+                  {{ post.likes }}
+                </span>
+              </v-card-subtitle>
 
-              <v-card-text>{{ description }}</v-card-text>
+              <v-card-text>{{ post.description }}</v-card-text>
             </div>
 
-            <v-avatar
-              class="ma-2 align-self-center d-none d-sm-block"
-              rounded
-              size="175"
-            >
-              <v-img :src="imageUrl"></v-img>
-            </v-avatar>
-            <v-img
-              :src="imageUrl"
-              class="ma-4 d-sm-none"
-              height="200"
-              width="calc(100% - 32px)"
-              cover
-              rounded
-            ></v-img>
+            <template v-if="post.image">
+              <v-avatar
+                class="ma-2 align-self-center d-none d-sm-block"
+                rounded
+                size="175"
+              >
+                <v-img :src="post.image"></v-img>
+              </v-avatar>
+              <v-img
+                :src="post.image ?? ''"
+                class="ma-4 d-sm-none"
+                height="200"
+                width="calc(100% - 32px)"
+                cover
+                rounded
+              ></v-img>
+            </template>
           </div>
         </v-card>
       </a>
@@ -76,17 +86,21 @@
   </v-hover>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { defineComponent, PropType } from 'vue'
+import { Post } from '@/@types/post'
+import { formatDate } from '@/utils/date'
+
+export default defineComponent({
   name: 'PostCard',
   props: {
+    post: {
+      type: Object as PropType<Post>,
+      required: true,
+    },
     showAuthor: {
       type: Boolean,
       default: true,
-    },
-    id: {
-      type: Number,
-      required: true,
     },
     avatarUrl: {
       type: String,
@@ -100,31 +114,14 @@ export default {
       type: Number,
       required: true,
     },
-    title: {
-      type: String,
-      required: true,
-    },
-    description: {
-      type: String,
-      required: true,
-    },
-    date: {
-      type: String,
-      required: true,
-    },
-    imageUrl: {
-      type: String,
-      required: true,
-    },
   },
   computed: {
     url() {
-      return `/post/${this?.id}`
+      return `/post/${this.post.id}`
     },
   },
-}
+  methods: {
+    formatDate,
+  },
+})
 </script>
-
-<style scoped>
-/* Add your component styles here */
-</style>

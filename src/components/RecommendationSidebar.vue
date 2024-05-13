@@ -24,7 +24,7 @@
                       :src="post.author.avatar"
                       :alt="post.author.firstname"
                     />
-                    <span v-else class="text-body">
+                    <span v-else class="text-subtitle-2">
                       {{ post.author.firstname?.[0] }}
                     </span>
                   </v-avatar>
@@ -80,22 +80,25 @@
       <div class="text-h5 mb-2 font-weight-bold">Recommended Authors</div>
       <v-list density="compact" bg-color="transparent" slim lines="three">
         <v-list-item
-          v-for="user in recommendedAuthors"
-          :key="user.id"
-          :prepend-avatar="user.avatar"
+          v-for="recommendedUser in recommendedAuthors"
+          :key="recommendedUser.id"
+          :prepend-avatar="recommendedUser.avatar"
           class="text-white ps-0"
           height="48"
         >
           <template v-slot:prepend>
-            <router-link :to="`/user/${user.id}`" class="text-decoration-none">
+            <router-link
+              :to="`/user/${recommendedUser.id}`"
+              class="text-decoration-none"
+            >
               <v-avatar size="32" color="primary" class="me-3">
                 <v-img
-                  v-if="user.avatar"
-                  :src="user.avatar"
-                  :alt="user.firstname"
+                  v-if="recommendedUser.avatar"
+                  :src="recommendedUser.avatar"
+                  :alt="recommendedUser.firstname"
                 />
                 <span v-else class="text-h6">
-                  {{ user.firstname?.[0] }}
+                  {{ recommendedUser.firstname?.[0] }}
                 </span>
               </v-avatar>
             </router-link>
@@ -105,7 +108,7 @@
             <template v-slot:default="{ isHovering, props }">
               <router-link
                 v-bind="props"
-                :to="`/user/${user.id}`"
+                :to="`/user/${recommendedUser.id}`"
                 class="text-white text-decoration-none"
               >
                 <div
@@ -116,24 +119,37 @@
                       : 'text-decoration-none')
                   "
                 >
-                  {{ user.firstname }} {{ user.lastname }}
+                  {{ recommendedUser.firstname }} {{ recommendedUser.lastname }}
                 </div>
                 <div class="clip-bio text-caption text-grey-lighten-2">
-                  {{ user.bio }}
+                  {{ recommendedUser.bio }}
                 </div>
               </router-link>
             </template>
           </v-hover>
 
           <template v-slot:append>
-            <v-btn
-              color="primary"
-              variant="outlined"
-              size="small"
-              class="align-self-center"
-            >
-              Follow
-            </v-btn>
+            <template v-if="user && recommendedUser.id !== user.id">
+              <v-btn
+                v-if="isFollowing(recommendedUser)"
+                color="primary"
+                size="small"
+                class="align-self-center"
+                @click="() => unfollowUser(recommendedUser)"
+              >
+                Following
+              </v-btn>
+              <v-btn
+                v-else
+                color="primary"
+                variant="outlined"
+                size="small"
+                class="align-self-center"
+                @click="() => followUser(recommendedUser)"
+              >
+                Follow
+              </v-btn>
+            </template>
           </template>
         </v-list-item>
       </v-list>
@@ -143,7 +159,7 @@
 
 <script lang="ts">
 import { useAppStore } from '../stores/app'
-import { mapState } from 'pinia'
+import { mapState, mapActions } from 'pinia'
 import axios from '@/utils/axios'
 import { User } from '@/@types/user'
 import { Post } from '@/@types/post'
@@ -161,7 +177,7 @@ export default {
       recommendedAuthors: User[]
     },
   computed: {
-    ...mapState(useAppStore, ['user', 'authenticated']),
+    ...mapState(useAppStore, ['user', 'authenticated', 'followingUsers']),
   },
   methods: {
     async fetchTrendingPosts() {
@@ -188,11 +204,18 @@ export default {
         console.error(error)
       }
     },
+    ...mapActions(useAppStore, [
+      'fetchFollowing',
+      'followUser',
+      'unfollowUser',
+      'isFollowing',
+    ]),
   },
   mounted() {
     this.fetchTrendingPosts()
     this.fetchRecommendedTopics()
     this.fetchRecommendedAuthors()
+    this.fetchFollowing()
   },
 }
 </script>

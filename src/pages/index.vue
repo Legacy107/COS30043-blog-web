@@ -4,9 +4,14 @@
       <v-col cols="12" sm="8">
         <v-row>
           <v-col cols="12">
-            <FilterPost />
+            <FilterPost
+              v-model:selectedTopics="selectedTopics"
+              v-model:sortBy="sortBy"
+              v-model:filterBy="filterBy"
+            />
           </v-col>
           <v-infinite-scroll
+            :key="sortBy + selectedTopics + filterBy"
             height="100%"
             width="100%"
             :items="posts"
@@ -15,14 +20,10 @@
             <template v-for="post in posts" :key="post.id">
               <v-col cols="12">
                 <PostCard
-                  :id="post.id"
+                  :post="post"
                   :avatarUrl="post.author.avatar ?? ''"
                   :author="post.author.firstname + ' ' + post.author.lastname"
                   :authorId="post.author.id"
-                  :title="post.title"
-                  :description="post.description"
-                  :date="formatDate(post.createAt)"
-                  :imageUrl="post.image ?? ''"
                 />
               </v-col>
             </template>
@@ -56,10 +57,16 @@ export default {
       posts: [],
       offset: 0,
       limit: 10,
+      sortBy: 'Newest',
+      selectedTopics: [],
+      filterBy: 'All',
     } as {
       posts: Array<Post & { author: User }>
       offset: number
       limit: number
+      sortBy: string
+      selectedTopics: Array<string>
+      filterBy: string
     }
   },
   methods: {
@@ -69,6 +76,11 @@ export default {
           params: {
             offset: this.offset,
             limit: this.limit,
+            following: this.filterBy === 'Following',
+            sort: this.sortBy,
+            ...(this.selectedTopics.length
+              ? { topics: this.selectedTopics.join(',') }
+              : {}),
           },
         })
         if (data.length === 0) return done('empty')
@@ -80,8 +92,22 @@ export default {
         done('error')
       }
     },
-    formatDate(dateString: string) {
-      return new Date(dateString).toLocaleString()
+  },
+  watch: {
+    selectedTopics: {
+      handler() {
+        this.offset = 0
+        this.posts = []
+      },
+      deep: true,
+    },
+    sortBy() {
+      this.offset = 0
+      this.posts = []
+    },
+    filterBy() {
+      this.offset = 0
+      this.posts = []
     },
   },
 }

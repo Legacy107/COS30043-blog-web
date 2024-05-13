@@ -39,6 +39,27 @@ const connection = require('../dbconnection')
 //   CONSTRAINT `user_follow_user` FOREIGN KEY (`userId`) REFERENCES `user` (`id`)
 // ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+router.get('/', async (req, res) => {
+  try {
+    const { search, offset = 0, limit = 5 } = req.query
+    const searchQuery = search ? `WHERE username LIKE '%${search}%'` : ''
+    const query = `SELECT * FROM user ${searchQuery} ORDER BY firstname ASC LIMIT ${limit} OFFSET ${offset}`
+    const users = await new Promise((resolve, reject) => {
+      connection.query(query, (err, results) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(results)
+        }
+      })
+    })
+    res.status(200).json(users)
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: 'Internal server error' })
+  }
+})
+
 router.get('/:id', async (req, res) => {
   const { id } = req.params
   try {
