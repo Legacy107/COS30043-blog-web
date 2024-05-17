@@ -3,6 +3,9 @@
     <v-row>
       <v-col cols="12" sm="8">
         <v-row>
+          <v-col v-if="search" cols="12">
+            <div class="text-h4 mb-4">Search results for "{{ search }}"</div>
+          </v-col>
           <v-col cols="12">
             <FilterPost
               v-model:selectedTopics="selectedTopics"
@@ -69,11 +72,17 @@ export default {
       filterBy: string
     }
   },
+  computed: {
+    search() {
+      return this.$route.query.search
+    },
+  },
   methods: {
     async fetchPosts({ done }: { done: (status: any) => void }) {
       try {
         const { data } = await axios.get('/post', {
           params: {
+            ...(this.search ? { search: this.search } : {}),
             offset: this.offset,
             limit: this.limit,
             following: this.filterBy === 'Following',
@@ -83,10 +92,10 @@ export default {
               : {}),
           },
         })
-        if (data.length === 0) return done('empty')
+        if (data.posts.length === 0) return done('empty')
 
-        this.posts = [...this.posts, ...data]
-        this.offset += data.length
+        this.posts = [...this.posts, ...data.posts]
+        this.offset += data.posts.length
         done('ok')
       } catch (error) {
         done('error')

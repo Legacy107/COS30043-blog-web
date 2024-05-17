@@ -38,7 +38,13 @@ const tokenMiddleware = require('../middleware/tokenMiddleware')
 
 router.get('/', tokenMiddleware, async (req, res) => {
   try {
-    const { search, offset = 0, limit = 10, sort, userId } = req.query
+    const {
+      search,
+      offset = 0,
+      limit = 10,
+      sort = 'Newest',
+      userId,
+    } = req.query
     const searchQuery = search ? `title LIKE '%${search}%'` : ''
     const topics = req.query.topics ? req.query.topics.split(',') : []
 
@@ -113,7 +119,11 @@ router.get('/', tokenMiddleware, async (req, res) => {
     whereQuery = whereQuery ? `WHERE ${whereQuery}` : ''
 
     const sortQuery =
-      sort === 'Newest' ? `ORDER BY createAt DESC` : `ORDER BY likes DESC`
+      sort === 'Newest'
+        ? `ORDER BY createAt DESC, id ASC`
+        : sort === 'Most liked'
+          ? `ORDER BY likes DESC, createAt DESC, id ASC`
+          : `ORDER BY comments DESC, createAt DESC, id ASC`
 
     const query = `
       SELECT * FROM post ${whereQuery} ${sortQuery} LIMIT ${limit} OFFSET ${offset};
@@ -155,7 +165,27 @@ router.get('/', tokenMiddleware, async (req, res) => {
       post.author = authorMap[post.userId]
     })
 
-    res.status(200).json(posts)
+    // get count if for a user
+    let total = 0
+    if (userId) {
+      total = await new Promise((resolve, reject) => {
+        connection.query(
+          `SELECT COUNT(*) as count FROM post WHERE userId=${userId}`,
+          (err, results) => {
+            if (err) {
+              reject(err)
+            } else {
+              resolve(results[0].count)
+            }
+          },
+        )
+      })
+    }
+
+    res.status(200).json({
+      posts,
+      total,
+    })
   } catch (error) {
     console.error(error)
     res.status(500).json({ message: 'Internal server error' })
@@ -213,9 +243,9 @@ router.get('/:id', async (req, res) => {
     post.topics = []
     if (topics.length) {
       const topicIds = topics.map((topic) => topic.topicId)
-      const topicNames = await new Promise((resolve, reject) => {
+      post.topics = await new Promise((resolve, reject) => {
         connection.query(
-          `SELECT name FROM topic WHERE id IN (${topicIds.map((id) => `${id}`).join(', ')})`,
+          `SELECT id, name FROM topic WHERE id IN (${topicIds.map((id) => `${id}`).join(', ')})`,
           (err, results) => {
             if (err) {
               reject(err)
@@ -225,7 +255,6 @@ router.get('/:id', async (req, res) => {
           },
         )
       })
-      post.topics = topicNames.map((topic) => topic.name)
     }
 
     res.status(200).json(post)

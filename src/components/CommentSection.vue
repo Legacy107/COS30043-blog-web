@@ -10,7 +10,7 @@
         rows="4"
         counter="300"
         :rules="commentRules"
-        required
+        validate-on="submit"
       />
       <v-btn color="primary" class="mb-6" type="submit" :loading="loading">
         Submit

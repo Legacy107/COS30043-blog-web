@@ -17,22 +17,38 @@
         <h2>{{ userProfile.firstname }} {{ userProfile.lastname }}</h2>
         <p>{{ followers }} Followers</p>
         <p class="my-4">{{ userProfile.bio }}</p>
-        <template v-if="user && user.id !== userProfile.id">
-          <v-btn
-            v-if="isFollowing(userProfile)"
-            color="primary"
-            @click="() => handleUnfollowUser(userProfile)"
-          >
-            Following
-          </v-btn>
-          <v-btn
-            v-else
-            color="primary"
-            variant="outlined"
-            @click="() => handleFollowUser(userProfile)"
-          >
-            Follow
-          </v-btn>
+        <template v-if="user">
+          <template v-if="user.id !== userProfile.id">
+            <v-btn
+              v-if="isFollowing(userProfile)"
+              color="primary"
+              @click="() => handleUnfollowUser(userProfile)"
+            >
+              Following
+            </v-btn>
+            <v-btn
+              v-else
+              color="primary"
+              variant="outlined"
+              @click="() => handleFollowUser(userProfile)"
+            >
+              Follow
+            </v-btn>
+          </template>
+
+          <template v-else>
+            <v-btn color="primary" @click="openEdit = true">
+              Edit Profile
+              <ProfileEditDialog
+                v-model:open="openEdit"
+                v-model:avatar="editProfile.avatar"
+                v-model:firstName="editProfile.firstname"
+                v-model:lastName="editProfile.lastname"
+                v-model:bio="editProfile.bio"
+                @submit="handleEditProfile"
+              />
+            </v-btn>
+          </template>
         </template>
       </v-col>
     </v-row>
@@ -169,9 +185,14 @@ import { useAppStore } from '@/stores/app'
 import { mapActions, mapState } from 'pinia'
 import { defineComponent, PropType } from 'vue'
 import { User } from '@/@types/user'
+import ProfileEditDialog from '@/components/ProfileEditDialog.vue'
+import axios from '@/utils/axios'
 
 export default defineComponent({
   name: 'ProfileAbout',
+  components: {
+    ProfileEditDialog,
+  },
   props: {
     userProfile: {
       type: Object as PropType<User>,
@@ -181,33 +202,76 @@ export default defineComponent({
       type: Array as PropType<User[]>,
       required: true,
     },
+    updateUser: {
+      type: Function,
+      default: () => {},
+    },
   },
   data: () =>
     ({
-      followingUsers: [],
       followersDelta: 0,
       followersDeltas: {} as Record<number, number>,
+      openEdit: false,
+      editProfile: {
+        avatar: [],
+        firstname: '',
+        lastname: '',
+        bio: '',
+      },
     }) as {
-      followingUsers: User[]
       followersDelta: number
       followersDeltas: Record<number, number>
+      openEdit: boolean
+      editProfile: {
+        avatar: File[]
+        firstname: string
+        lastname: string
+        bio: string
+      }
     },
   methods: {
     async handleFollowUser(user: User) {
-      await this.followUser(user)
-      this.followersDelta++
+      try {
+        await this.followUser(user)
+        this.followersDelta++
+      } catch (error) {
+        console.error(error)
+      }
     },
     async handleUnfollowUser(user: User) {
-      await this.unfollowUser(user)
-      this.followersDelta--
+      try {
+        await this.unfollowUser(user)
+        this.followersDelta--
+      } catch (error) {
+        console.error(error)
+      }
     },
     async handleFollowUserFromList(user: User) {
-      await this.followUser(user)
-      this.followersDeltas[user.id] = (this.followersDeltas[user.id] ?? 0) + 1
+      try {
+        await this.followUser(user)
+        this.followersDeltas[user.id] = (this.followersDeltas[user.id] ?? 0) + 1
+      } catch (error) {
+        console.error(error)
+      }
     },
     async handleUnfollowUserFromList(user: User) {
-      await this.unfollowUser(user)
-      this.followersDeltas[user.id] = (this.followersDeltas[user.id] ?? 0) - 1
+      try {
+        await this.unfollowUser(user)
+        this.followersDeltas[user.id] = (this.followersDeltas[user.id] ?? 0) - 1
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    async handleEditProfile() {
+      const formData = new FormData()
+      formData.append('firstname', this.editProfile.firstname)
+      formData.append('lastname', this.editProfile.lastname)
+      formData.append('bio', this.editProfile.bio)
+      if (this.editProfile.avatar.length > 0)
+        formData.append('avatar', this.editProfile.avatar[0])
+
+      await axios.put('/user', formData)
+      this.updateUser()
     },
     ...mapActions(useAppStore, [
       'fetchFollowing',
@@ -224,6 +288,20 @@ export default defineComponent({
   },
   mounted() {
     this.fetchFollowing()
+  },
+  watch: {
+    userProfile: {
+      immediate: true,
+      handler(newVal, oldVal) {
+        if (newVal.id !== oldVal?.id)
+          this.editProfile = {
+            avatar: [],
+            firstname: newVal.firstname,
+            lastname: newVal.lastname,
+            bio: newVal.bio,
+          }
+      },
+    },
   },
 })
 </script>

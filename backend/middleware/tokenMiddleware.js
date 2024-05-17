@@ -7,7 +7,7 @@ function tokenMiddleware(req, res, next) {
     req.userId = decoded.id
     next()
   } catch (error) {
-    next()
+    /* ignore */
   }
 }
 

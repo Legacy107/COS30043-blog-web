@@ -8,7 +8,8 @@
         class="d-flex justify-center mb-4 pe-md-6"
       >
         <ProfileAbout
-          v-if="user && following"
+          v-if="user && following?.length"
+          :updateUser="() => user && fetchUser(user.id)"
           :userProfile="user"
           :followers="user.followers"
           :following="following"
@@ -19,75 +20,143 @@
           <div class="post-title text-h4 font-weight-bold mb-2 ps-3 px-md-1">
             Posts
           </div>
-          <v-infinite-scroll
-            v-if="user"
-            height="100%"
-            :items="posts"
-            :onLoad="fetchPosts"
-          >
-            <template v-for="post in posts" :key="post.id">
-              <v-col cols="12">
-                <PostCard
-                  :post="post"
-                  :avatarUrl="user.avatar ?? ''"
-                  :author="user.firstname + ' ' + user.lastname"
-                  :authorId="user.id"
-                />
-              </v-col>
+          <div v-if="user" class="mt-3">
+            <template v-if="postLoading">
+              <v-row class="posts-container overflow-hidden">
+                <v-col cols="12">
+                  <v-skeleton-loader
+                    type="image"
+                    v-for="i in limit"
+                    :key="`post-loading-${i}`"
+                    class="mb-6"
+                    width="720px"
+                    height="200px"
+                  />
+                </v-col>
+              </v-row>
             </template>
-          </v-infinite-scroll>
+
+            <template v-if="!postLoading">
+              <v-hover v-for="post in posts" :key="post.id">
+                <template v-slot:default="{ isHovering, props }">
+                  <v-row
+                    v-bind="props"
+                    class="position-relative posts-container"
+                  >
+                    <v-col cols="12">
+                      <PostCard
+                        :post="post"
+                        :avatarUrl="user.avatar ?? ''"
+                        :author="user.firstname + ' ' + user.lastname"
+                        :authorId="user.id"
+                      />
+                    </v-col>
+                    <v-fade-transition>
+                      <div
+                        v-if="showPostActions"
+                        v-show="isHovering"
+                        class="position-absolute post-edit flex-column"
+                      >
+                        <v-btn
+                          icon="mdi-delete"
+                          class="mb-2"
+                          color="error"
+                          @click="() => handleOpenDeleteDialog(post.id)"
+                        />
+                        <v-btn
+                          :to="`/post/${post.id}/edit`"
+                          icon="mdi-pencil"
+                          class="mb-2"
+                          color="primary"
+                        />
+                      </div>
+                    </v-fade-transition>
+                  </v-row>
+                </template>
+              </v-hover>
+            </template>
+
+            <v-pagination
+              v-if="total > limit"
+              v-model="page"
+              :length="Math.ceil(total / limit)"
+              class="mt-6 mb-10"
+            />
+          </div>
         </v-row>
       </v-col>
     </v-row>
+
+    <DeletePostConfirmation
+      v-if="showPostActions && deletePostTitle"
+      v-model:open="openDeleteDialog"
+      :postTitle="deletePostTitle"
+      @submit="handleDeletePost"
+    />
   </v-container>
 </template>
 
 <script lang="ts">
 import PostCard from '@/components/PostCard.vue'
 import ProfileAbout from '@/components/ProfileAbout.vue'
+import DeletePostConfirmation from '@/components/DeletePostConfirmation.vue'
 import axios from '@/utils/axios'
 import { User } from '@/@types/user'
 import { Post } from '@/@types/post'
+import { mapState } from 'pinia'
+import { useAppStore } from '@/stores/app'
 
 export default {
   name: 'Profile',
   components: {
     PostCard,
     ProfileAbout,
+    DeletePostConfirmation,
   },
   data() {
     return {
       user: null,
       following: [],
-      offset: 0,
-      limit: 10,
+      page: 1,
+      limit: 5,
+      total: 0,
       posts: [],
+      postLoading: true,
+      openDeleteDialog: false,
+      deletePostId: 0,
     } as {
       user: null | User
       following: User[]
-      offset: number
+      page: number
       limit: number
+      total: number
       posts: Post[]
+      postLoading: boolean
+      openDeleteDialog: boolean
+      deletePostId: number
     }
   },
   methods: {
-    async fetchPosts({ done }: { done: (status: any) => void }) {
-      try {
-        const { data } = await axios.get('/post', {
+    fetchPosts() {
+      this.postLoading = true
+      const offset = (this.page - 1) * this.limit
+      axios
+        .get('/post', {
           params: {
-            offset: this.offset,
+            offset: offset,
             limit: this.limit,
             userId: this.id,
           },
         })
-        if (data.length === 0) return done('empty')
-
-        this.posts = [...this.posts, ...data]
-        this.offset += data.length
-        done('ok')
-      } catch (error) {
-        done('error')
-      }
+        .then(({ data }) => {
+          this.posts = data.posts
+          this.total = data.total
+          this.postLoading = false
+        })
+        .catch((error) => {
+          console.error(error)
+          this.postLoading = false
+        })
     },
     async fetchUser(id: number) {
       const { data } = await axios.get(`/user/${id}`)
@@ -100,12 +169,35 @@ export default {
     async fetchData(id: number) {
       this.fetchUser(id)
       this.fetchFollowing(id)
+      this.fetchPosts()
+    },
+    handleOpenDeleteDialog(postId: number) {
+      this.deletePostId = postId
+      this.openDeleteDialog = true
+    },
+    async handleDeletePost() {
+      try {
+        if (!this.deletePostId) return
+        await axios.delete(`/post/${this.deletePostId}`)
+        this.fetchPosts()
+      } catch (error) {
+        console.error(error)
+      }
     },
   },
   computed: {
     id() {
       const { id } = this.$route.params as unknown as { id: string }
       return parseInt(id ?? '0')
+    },
+    ...mapState(useAppStore, {
+      currentUser: (store) => store.user,
+    }),
+    showPostActions() {
+      return this.user?.id === this.currentUser?.id
+    },
+    deletePostTitle() {
+      return this.posts.find((post) => post.id === this.deletePostId)?.title
     },
   },
   mounted() {
@@ -114,8 +206,11 @@ export default {
   watch: {
     id(newId) {
       this.posts = []
-      this.offset = 0
+      this.page = 1
       this.fetchData(newId)
+    },
+    page() {
+      this.fetchPosts()
     },
   },
 }
@@ -128,5 +223,14 @@ export default {
 .post-title {
   width: 100%;
   max-width: 720px;
+}
+.posts-container {
+  max-width: 730px;
+}
+.post-edit {
+  display: flex;
+  bottom: 1rem;
+  right: 0;
+  transform: translateX(-40%);
 }
 </style>

@@ -40,6 +40,7 @@
             <span class="text-caption">{{ formatDate(post.createAt) }}</span>
           </div>
           <v-btn
+            v-if="user && user.id !== post.author.id"
             class="ms-auto"
             color="primary"
             :variant="followButtonVariant"
@@ -77,13 +78,13 @@
         <div class="text-h6 mb-1 font-weight-bold">Topics</div>
         <v-chip-group column>
           <v-chip
-            v-for="(topic, i) in post.topics"
-            :key="i"
+            v-for="topic in post.topics"
+            :key="'topic' + topic.id"
             class="ma-1"
             color="primary"
-            :href="`/?topics=${topic}`"
+            :href="`/?topics=${topic.id}`"
           >
-            {{ topic }}
+            {{ topic.name }}
           </v-chip>
         </v-chip-group>
       </v-col>
@@ -118,6 +119,7 @@ import { Post } from '@/@types/post'
 import { User } from '@/@types/user'
 import { useAppStore } from '@/stores/app'
 import { mapState } from 'pinia'
+import { Topic } from '@/@types/topic'
 
 export default {
   name: 'Post',
@@ -136,7 +138,7 @@ export default {
       openComments: boolean
       isLiked: boolean
       isFollowing: boolean
-      post: null | (Post & { author: User } & { topics: string[] })
+      post: null | (Post & { author: User } & { topics: Topic[] })
     }
   },
   methods: {

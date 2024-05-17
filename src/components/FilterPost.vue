@@ -64,7 +64,7 @@ export default {
   emits: ['update:sortBy', 'update:selectedTopics', 'update:filterBy'],
   data() {
     return {
-      sortOptions: ['Newest', 'Most viewed', 'Most liked'],
+      sortOptions: ['Newest', 'Most liked', 'Most commented'],
       availableTopics: [],
       filterOptions: ['All', 'Following'],
     }

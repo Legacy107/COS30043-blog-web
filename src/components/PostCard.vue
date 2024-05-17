@@ -57,6 +57,10 @@
                   <v-icon size="small" color="primary">mdi-heart</v-icon>
                   {{ post.likes }}
                 </span>
+                <span>
+                  <v-icon size="small" color="primary">mdi-comment</v-icon>
+                  {{ post.comments }}
+                </span>
               </v-card-subtitle>
 
               <v-card-text>{{ post.description }}</v-card-text>

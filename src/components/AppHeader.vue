@@ -5,8 +5,9 @@
         <a
           href="/"
           class="text-h5 text-sm-h4 text-decoration-none font-weight-bold text-white"
-          >Logo</a
         >
+          Blov
+        </a>
       </v-app-bar-title>
 
       <v-text-field
@@ -22,6 +23,7 @@
         <v-menu open-on-click activator="parent" open-on-focus>
           <SearchResult
             v-if="search.length > 1"
+            :search-query="search"
             :loading="searchLoading"
             :posts="searchPosts"
             :users="searchUsers"
@@ -122,7 +124,7 @@ export default {
       const { data } = await axios.get(
         `/post?search=${this.search}&limit=5&sort=Newest`,
       )
-      this.searchPosts = data
+      this.searchPosts = data.posts
     },
     async fetchSearchTopics() {
       const { data } = await axios.get(`/topic?search=${this.search}&limit=5`)

@@ -20,6 +20,15 @@
           >
             <v-list-item-title>{{ post.title }}</v-list-item-title>
           </v-list-item>
+          <v-btn
+            v-if="searchQuery"
+            color="primary"
+            variant="plain"
+            append-icon="mdi-arrow-right"
+            :href="`/?search=${searchQuery}`"
+          >
+            View all post
+          </v-btn>
         </template>
         <template v-else>
           <v-list-item>
@@ -111,6 +120,10 @@ export default defineComponent({
     loading: {
       type: Boolean,
       default: false,
+    },
+    searchQuery: {
+      type: String,
+      default: '',
     },
     posts: {
       type: Array as PropType<Post[]>,
