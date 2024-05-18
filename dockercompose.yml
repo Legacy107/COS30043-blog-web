@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  blov-be:
+    image: legacy107/blov-be
+    restart: always
+    ports:
+      - "3001:3001"
+
+  blov-fe:
+    image: legacy107/blov-fe
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - blov-be
