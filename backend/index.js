@@ -10,7 +10,8 @@ const protectedCommentRoutes = require('./routes/protected/comment')
 const userRoutes = require('./routes/user')
 const protectedUserRoutes = require('./routes/protected/user')
 const topicRoutes = require('./routes/topic')
-const recommendationRoutes = require('./routes/protected/recommendation')
+const recommendationRoutes = require('./routes/recommendation')
+const protectedRecommendationRoutes = require('./routes/protected/recommendation')
 
 const app = express()
 app.use(express.json())
@@ -22,7 +23,8 @@ app.use('/comment', authenticateToken, protectedCommentRoutes)
 app.use('/user', userRoutes)
 app.use('/user', authenticateToken, protectedUserRoutes)
 app.use('/topic', topicRoutes)
-app.use('/recommendation', authenticateToken, recommendationRoutes)
+app.use('/recommendation', recommendationRoutes)
+app.use('/recommendation', authenticateToken, protectedRecommendationRoutes)
 
 app.get('/users', authenticateToken, (req, res) => {
   connection.query('SELECT * FROM user', (error, results) => {

@@ -16,12 +16,6 @@
           {{ user.firstname }} {{ user.lastname }}
         </v-list-item-title>
       </v-list-subheader>
-      <v-list-item @click="goToAccountSettings">
-        <template v-slot:prepend>
-          <v-icon icon="mdi-account-circle-outline"></v-icon>
-        </template>
-        <v-list-item-title>Account Settings</v-list-item-title>
-      </v-list-item>
       <v-list-item @click="signOut">
         <template v-slot:prepend>
           <v-icon icon="mdi-exit-to-app"></v-icon>
@@ -47,9 +41,6 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useAppStore, ['logout']),
-    goToAccountSettings() {
-      // Add your logic to navigate to the account settings page
-    },
     signOut() {
       this.logout()
       this.$router.push('/')

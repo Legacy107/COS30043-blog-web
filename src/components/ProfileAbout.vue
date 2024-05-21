@@ -52,7 +52,7 @@
         </template>
       </v-col>
     </v-row>
-    <div v-if="followingUsers.length" class="mt-10">
+    <div v-if="following.length" class="mt-10">
       <div class="text-h6">Following</div>
       <v-list density="compact" bg-color="transparent" slim>
         <v-hover v-for="followingUser in following" :key="followingUser.id">

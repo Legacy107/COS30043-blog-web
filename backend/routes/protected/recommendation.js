@@ -35,18 +35,15 @@ const connection = require('../../dbconnection')
 //   CONSTRAINT `post_topic_topicId` FOREIGN KEY (`topicId`) REFERENCES `topic` (`id`)
 // ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-// CREATE TABLE `post` (
-//   `id` int NOT NULL AUTO_INCREMENT,
-//   `title` varchar(100) NOT NULL,
-//   `createAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-//   `description` varchar(300) NOT NULL,
-//   `content` mediumtext NOT NULL,
+// CREATE TABLE `post_like` (
+//   `postId` int NOT NULL,
 //   `userId` int NOT NULL,
-//   `likes` int NOT NULL DEFAULT '0',
-//   `comments` int NOT NULL DEFAULT '0',
-//   PRIMARY KEY (`id`),
-//   KEY `post-userId_idx` (`userId`),
-//   CONSTRAINT `post-userId` FOREIGN KEY (`userId`) REFERENCES `user` (`id`)
+//   `createAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+//   PRIMARY KEY (`postId`,`userId`),
+//   KEY `postId_idx` (`postId`),
+//   KEY `userId_idx` (`userId`),
+//   CONSTRAINT `like-postId` FOREIGN KEY (`postId`) REFERENCES `post` (`id`),
+//   CONSTRAINT `like-userId` FOREIGN KEY (`userId`) REFERENCES `user` (`id`)
 // ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 // CREATE TABLE `user` (
@@ -71,46 +68,6 @@ const connection = require('../../dbconnection')
 //   CONSTRAINT `user_follow_follower` FOREIGN KEY (`followerId`) REFERENCES `user` (`id`),
 //   CONSTRAINT `user_follow_user` FOREIGN KEY (`userId`) REFERENCES `user` (`id`)
 // ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-router.get('/posts', async (req, res) => {
-  // return first 5 posts order by likes and comments
-  const posts = await new Promise((resolve, reject) => {
-    connection.query(
-      `SELECT * FROM post ORDER BY likes DESC, comments DESC LIMIT 5`,
-      (err, results) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(results)
-        }
-      },
-    )
-  })
-
-  // populate author
-  const authorIds = posts.map((post) => post.userId)
-  const authors = await new Promise((resolve, reject) => {
-    connection.query(
-      `SELECT * FROM user WHERE id IN (${authorIds.map((id) => `${id}`).join(', ')})`,
-      (err, results) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(results)
-        }
-      },
-    )
-  })
-  const authorMap = authors.reduce((acc, author) => {
-    acc[author.id] = author
-    return acc
-  }, {})
-  posts.forEach((post) => {
-    post.author = authorMap[post.userId]
-  })
-
-  res.status(200).json(posts)
-})
 
 router.get('/topics', async (req, res) => {
   // return first 10 topics order by name
