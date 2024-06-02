@@ -3,7 +3,6 @@ const router = express.Router()
 const connection = require('../../dbconnection')
 const authenticateToken = require('../../middleware/authMiddleware')
 
-
 router.get('/topics', authenticateToken, async (req, res) => {
   // return first 10 topics order by name
   const topics = await new Promise((resolve, reject) => {
