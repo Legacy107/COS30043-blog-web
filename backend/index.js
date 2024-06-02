@@ -1,7 +1,6 @@
 require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
-const connection = require('./dbconnection')
 const authenticateToken = require('./middleware/authMiddleware')
 const authRoutes = require('./routes/auth')
 const postRoutes = require('./routes/post')
@@ -26,10 +25,8 @@ app.use('/topic', topicRoutes)
 app.use('/recommendation', recommendationRoutes)
 app.use('/recommendation', authenticateToken, protectedRecommendationRoutes)
 
-app.get('/users', authenticateToken, (req, res) => {
-  connection.query('SELECT * FROM user', (error, results) => {
-    res.status(200).json(results)
-  })
+app.get('/hc', (req, res) => {
+  res.status(200).send('Healthy')
 })
 
 // Start the server

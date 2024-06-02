@@ -17,6 +17,7 @@
             :key="sortBy + selectedTopics + filterBy"
             height="100%"
             width="100%"
+            class="overflow-hidden"
             :items="posts"
             :onLoad="fetchPosts"
           >

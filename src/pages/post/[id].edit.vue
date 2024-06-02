@@ -110,4 +110,7 @@ export default {
 .markdown-body input[type='text'] {
   color: #24292e;
 }
+.markdown-body .fa-mavon-picture-o .dropdown-item:last-child {
+  display: none;
+}
 </style>

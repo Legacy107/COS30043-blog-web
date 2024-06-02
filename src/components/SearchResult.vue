@@ -92,6 +92,7 @@
             :key="i"
             :value="topic"
             color="primary"
+            :href="`/?topic=${topic.name}`"
           >
             <v-list-item-title>{{ topic.name }}</v-list-item-title>
           </v-list-item>

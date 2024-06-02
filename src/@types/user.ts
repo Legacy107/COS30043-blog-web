@@ -3,7 +3,7 @@ export type User = {
   username: string
   firstname: string
   lastname: string
-  avatar: string
-  bio: string
+  avatar?: string
+  bio?: string
   followers: number
 }

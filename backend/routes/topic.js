@@ -2,17 +2,12 @@ const express = require('express')
 const router = express.Router()
 const connection = require('../dbconnection')
 
-// CREATE TABLE `topic` (
-//   `id` int NOT NULL AUTO_INCREMENT,
-//   `name` varchar(100) NOT NULL,
-//   PRIMARY KEY (`id`),
-//   UNIQUE KEY `name_UNIQUE` (`name`)
-// ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
 router.get('/', async (req, res) => {
   try {
     const { search, limit } = req.query
-    const searchQuery = search?.length ? `WHERE name LIKE '%${search}%'` : ''
+    const searchQuery = search?.length
+      ? `WHERE name LIKE ${connection.escape('%' + search + '%')}`
+      : ''
     const limitQuery = limit ? `LIMIT ${limit}` : ''
 
     const topics = await new Promise((resolve, reject) => {

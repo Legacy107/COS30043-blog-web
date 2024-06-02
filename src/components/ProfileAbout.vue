@@ -270,10 +270,15 @@ export default defineComponent({
       if (this.editProfile.avatar.length > 0)
         formData.append('avatar', this.editProfile.avatar[0])
 
-      await axios.put('/user', formData)
+      const { data } = await axios.put('/user', formData)
+      this.setUser({
+        ...this.user,
+        ...data,
+      })
       this.updateUser()
     },
     ...mapActions(useAppStore, [
+      'setUser',
       'fetchFollowing',
       'followUser',
       'unfollowUser',

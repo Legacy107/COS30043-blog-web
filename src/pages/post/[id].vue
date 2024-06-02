@@ -72,7 +72,7 @@
         </div>
       </v-col>
       <v-col cols="12">
-        <Markdown :breaks="true" :source="post.content" />
+        <Markdown :breaks="true" :source="post.content" :html="true" />
       </v-col>
       <v-col cols="12" class="mt-6">
         <div class="text-h6 mb-1 font-weight-bold">Topics</div>
@@ -82,7 +82,7 @@
             :key="'topic' + topic.id"
             class="ma-1"
             color="primary"
-            :href="`/?topics=${topic.id}`"
+            :href="`/?topics=${topic.name}`"
           >
             {{ topic.name }}
           </v-chip>
@@ -120,6 +120,7 @@ import { User } from '@/@types/user'
 import { useAppStore } from '@/stores/app'
 import { mapState } from 'pinia'
 import { Topic } from '@/@types/topic'
+import { formatDate } from '@/utils/date'
 
 export default {
   name: 'Post',
@@ -150,7 +151,7 @@ export default {
       comments.scrollIntoView({ behavior: 'smooth', block: 'end' })
     },
     formatDate(dateString: string) {
-      return new Date(dateString).toLocaleString()
+      return formatDate(dateString)
     },
     async likePost() {
       try {

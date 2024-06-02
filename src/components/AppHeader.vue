@@ -1,7 +1,9 @@
 <template>
   <header>
     <v-app-bar app scroll-behavior="elevate">
-      <v-app-bar-title class="bar-title">
+      <v-app-bar-title
+        :class="'bar-title ' + (expandSearch ? 'd-none' : 'd-block')"
+      >
         <a
           href="/"
           class="text-h5 text-sm-h4 text-decoration-none font-weight-bold text-white"
@@ -42,7 +44,32 @@
           <v-btn :color="item.color">{{ item.title }}</v-btn>
         </a>
 
-        <div class="d-sm-none">
+        <v-fade-transition hide-on-leave>
+          <v-text-field
+            v-show="expandSearch"
+            v-model="search"
+            class="search-bar d-sm-none mr-3"
+            placeholder="Search"
+            center-affix
+            density="compact"
+            flat
+            hide-details
+            variant="outlined"
+          >
+            <v-menu open-on-click activator="parent" open-on-focus>
+              <SearchResult
+                v-if="search.length > 1"
+                :search-query="search"
+                :loading="searchLoading"
+                :posts="searchPosts"
+                :users="searchUsers"
+                :topics="searchTopics"
+              />
+            </v-menu>
+          </v-text-field>
+        </v-fade-transition>
+
+        <div class="d-sm-none min-width-100">
           <v-btn icon="mdi-magnify" v-on:click="openSearch"></v-btn>
           <v-menu transition="fade-transition">
             <template v-slot:activator="{ props }">
@@ -105,6 +132,7 @@ export default {
       searchUsers: [],
       searchTimeout: null,
       searchLoading: false,
+      expandSearch: false,
     } as {
       openMenu: boolean
       search: string
@@ -113,13 +141,16 @@ export default {
       searchUsers: User[]
       searchTimeout: any
       searchLoading: boolean
+      expandSearch: boolean
     }
   },
   methods: {
     handleOpenMenu() {
       this.openMenu = !this.openMenu
     },
-    openSearch() {},
+    openSearch() {
+      this.expandSearch = !this.expandSearch
+    },
     async fetchSearchPosts() {
       const { data } = await axios.get(
         `/post?search=${this.search}&limit=5&sort=Newest`,
@@ -180,5 +211,24 @@ export default {
   flex-grow: 0;
   flex-basis: auto;
   margin-right: 1rem;
+  min-width: 3rem;
+}
+
+.min-width-100 {
+  min-width: 100px;
+}
+
+@media (min-width: 601px) {
+  .bar-title {
+    display: block !important;
+  }
+}
+
+@media (max-width: 600px) {
+  :deep(.v-toolbar__append) {
+    width: 100%;
+    margin-left: 10px;
+    justify-content: flex-end;
+  }
 }
 </style>

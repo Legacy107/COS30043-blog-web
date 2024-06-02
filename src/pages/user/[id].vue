@@ -8,7 +8,7 @@
         class="d-flex justify-center mb-4 pe-md-6"
       >
         <ProfileAbout
-          v-if="user && following?.length"
+          v-if="user && typeof following?.length === 'number'"
           :updateUser="() => user && fetchUser(user.id)"
           :userProfile="user"
           :followers="user.followers"
@@ -158,9 +158,10 @@ export default {
           this.postLoading = false
         })
     },
-    async fetchUser(id: number) {
+    async fetchUser(id: number): Promise<User> {
       const { data } = await axios.get(`/user/${id}`)
       this.user = data
+      return data
     },
     async fetchFollowing(id: number) {
       const { data } = await axios.get(`/user/${id}/following`)
@@ -197,7 +198,7 @@ export default {
       return this.user?.id === this.currentUser?.id
     },
     deletePostTitle() {
-      return this.posts.find((post) => post.id === this.deletePostId)?.title
+      return this.posts?.find((post) => post.id === this.deletePostId)?.title
     },
   },
   mounted() {

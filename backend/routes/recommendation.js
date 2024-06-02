@@ -34,7 +34,7 @@ router.get('/posts', async (req, res) => {
             if (err) {
               reject(err)
             } else {
-              resolve(results)
+              resolve(results.map((user) => ({ ...user, password: undefined })))
             }
           },
         )

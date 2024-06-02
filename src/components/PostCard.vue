@@ -50,9 +50,11 @@
               >
 
               <v-card-subtitle
-                class="d-inline-flex ga-1 justify-center align-center ga-5"
+                class="d-inline-flex justify-center align-center ga-1 gc-5 flex-wrap post-subtitle"
               >
-                {{ formatDate(post.createAt) }}
+                <span>
+                  {{ formatDate(post.createAt) }}
+                </span>
                 <span>
                   <v-icon size="small" color="primary">mdi-heart</v-icon>
                   {{ post.likes }}
@@ -129,3 +131,14 @@ export default defineComponent({
   },
 })
 </script>
+
+<style scoped>
+@media (max-width: 600px) {
+  .post-subtitle {
+    justify-content: flex-start !important;
+  }
+  .post-subtitle span {
+    text-wrap: wrap;
+  }
+}
+</style>

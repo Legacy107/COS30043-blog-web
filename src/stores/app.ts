@@ -18,6 +18,7 @@ export const useAppStore = defineStore('app', {
   actions: {
     setUser(user: User) {
       this.user = user
+      Cookies.set('user', JSON.stringify(user))
     },
     logout() {
       this.user = null

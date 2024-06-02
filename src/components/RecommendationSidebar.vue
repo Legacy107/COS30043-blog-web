@@ -84,7 +84,9 @@
           v-for="recommendedUser in recommendedAuthors"
           :key="recommendedUser.id"
           :prepend-avatar="recommendedUser.avatar"
-          class="text-white ps-0"
+          :class="
+            'text-white ps-0' + (!recommendedUser.bio?.length ? ' no-bio' : '')
+          "
           height="48"
         >
           <template v-slot:prepend>
@@ -138,7 +140,8 @@
                 class="align-self-center"
                 @click="() => unfollowUser(recommendedUser)"
               >
-                Following
+                <span class="d-none d-md-block">Following</span>
+                <v-icon class="d-md-none">mdi-account-check</v-icon>
               </v-btn>
               <v-btn
                 v-else
@@ -148,7 +151,8 @@
                 class="align-self-center"
                 @click="() => followUser(recommendedUser)"
               >
-                Follow
+                <span class="d-none d-md-block">Follow</span>
+                <v-icon class="d-md-none">mdi-account-plus</v-icon>
               </v-btn>
             </template>
           </template>
@@ -241,6 +245,10 @@ export default {
   -webkit-box-orient: vertical;
   overflow: hidden;
   font-size: 13px !important;
+}
+
+.no-bio {
+  min-height: 60px !important;
 }
 
 :deep(.v-list-item--three-line .v-list-item__append) {

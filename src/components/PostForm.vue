@@ -46,6 +46,28 @@
       v-model="_content"
       language="en"
       placeholder="Compose your post in markdown"
+      :toolbars="{
+        bold: true,
+        italic: true,
+        header: true,
+        underline: true,
+        strikethrough: true,
+        mark: true,
+        superscript: true,
+        subscript: true,
+        quote: true,
+        ol: true,
+        ul: true,
+        link: true,
+        imagelink: true,
+        table: true,
+        code: true,
+        preview: true,
+        fullscreen: false,
+        guide: true,
+        undo: true,
+        redo: true,
+      }"
     />
     <v-btn
       type="submit"

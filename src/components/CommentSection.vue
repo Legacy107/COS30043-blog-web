@@ -85,6 +85,7 @@ import { useAppStore } from '@/stores/app'
 import { mapState } from 'pinia'
 import { Comment } from '@/@types/comment'
 import { User } from '@/@types/user'
+import { formatDate } from '@/utils/date'
 
 export default {
   props: {
@@ -148,9 +149,7 @@ export default {
         this.loading = false
       }
     },
-    formatDate(dateString: string) {
-      return new Date(dateString).toLocaleString()
-    },
+    formatDate,
     async likeComment(commentId: number) {
       try {
         await axios.post(`/comment/${commentId}/like`)

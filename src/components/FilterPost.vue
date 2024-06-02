@@ -1,6 +1,6 @@
 <template>
   <v-row>
-    <v-col cols="12" sm="3">
+    <v-col v-if="authenticated" cols="12" md="3">
       <v-select
         v-model="filter"
         :items="filterOptions"
@@ -11,7 +11,7 @@
       />
     </v-col>
 
-    <v-col cols="12" sm="6">
+    <v-col cols="12" md="6">
       <v-autocomplete
         v-model="topics"
         :items="availableTopics"
@@ -27,7 +27,7 @@
       />
     </v-col>
 
-    <v-col cols="12" sm="3">
+    <v-col cols="12" md="3">
       <v-select
         v-model="sort"
         :items="sortOptions"
@@ -43,6 +43,8 @@
 <script lang="ts">
 import axios from '@/utils/axios'
 import { Topic } from '@/@types/topic'
+import { useAppStore } from '@/stores/app'
+import { mapState } from 'pinia'
 
 export default {
   props: {
@@ -70,6 +72,7 @@ export default {
     }
   },
   computed: {
+    ...mapState(useAppStore, ['authenticated']),
     topics: {
       get() {
         return this.selectedTopics
@@ -107,6 +110,13 @@ export default {
   },
   mounted() {
     this.fetchTopics()
+  },
+  watch: {
+    authenticated(value: boolean) {
+      if (!value) {
+        this.filter = 'All'
+      }
+    },
   },
 }
 </script>

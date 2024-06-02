@@ -12,11 +12,11 @@
       {{ noComments }}
       <v-tooltip activator="parent" location="top">Comment</v-tooltip>
     </v-btn>
-    <v-btn variant="plain" icon class="ms-auto">
+    <!-- <v-btn variant="plain" icon class="ms-auto">
       <v-icon>mdi-bookmark-plus-outline</v-icon>
       <v-tooltip activator="parent" location="top">Save</v-tooltip>
-    </v-btn>
-    <v-btn variant="plain" icon>
+    </v-btn> -->
+    <v-btn variant="plain" icon class="ms-auto">
       <v-icon>mdi-share-variant</v-icon>
       <v-tooltip activator="parent" location="top">Share</v-tooltip>
       <ShareModal :url="shareUrl" :title="shareTitle" />

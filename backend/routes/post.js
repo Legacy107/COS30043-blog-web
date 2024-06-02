@@ -3,39 +3,6 @@ const router = express.Router()
 const connection = require('../dbconnection')
 const tokenMiddleware = require('../middleware/tokenMiddleware')
 
-// CREATE TABLE `post` (
-//   `id` int NOT NULL AUTO_INCREMENT,
-//   `title` varchar(100) NOT NULL,
-//   `createAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-//   `description` varchar(300) NOT NULL,
-//   `content` mediumtext NOT NULL,
-//   `userId` int NOT NULL,
-//   `likes` int NOT NULL DEFAULT '0',
-//   `comments` int NOT NULL DEFAULT '0',
-//   `image` varchar(200) DEFAULT NULL,
-//   PRIMARY KEY (`id`),
-//   KEY `post-userId_idx` (`userId`),
-//   CONSTRAINT `post-userId` FOREIGN KEY (`userId`) REFERENCES `user` (`id`)
-// ) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-// CREATE TABLE `topic` (
-//   `id` int NOT NULL AUTO_INCREMENT,
-//   `name` varchar(100) NOT NULL,
-//   PRIMARY KEY (`id`),
-//   UNIQUE KEY `name_UNIQUE` (`name`)
-// ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-// CREATE TABLE `post_topic` (
-//   `id` int NOT NULL AUTO_INCREMENT,
-//   `postId` int NOT NULL,
-//   `topicId` int NOT NULL,
-//   PRIMARY KEY (`id`),
-//   KEY `post_topic_postId_idx` (`postId`),
-//   KEY `post_topic_topicId_idx` (`topicId`),
-//   CONSTRAINT `post_topic_postId` FOREIGN KEY (`postId`) REFERENCES `post` (`id`),
-//   CONSTRAINT `post_topic_topicId` FOREIGN KEY (`topicId`) REFERENCES `topic` (`id`)
-// ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
 router.get('/', tokenMiddleware, async (req, res) => {
   try {
     const {
@@ -45,7 +12,9 @@ router.get('/', tokenMiddleware, async (req, res) => {
       sort = 'Newest',
       userId,
     } = req.query
-    const searchQuery = search ? `title LIKE '%${search}%'` : ''
+    const searchQuery = search
+      ? `title LIKE ${connection.escape('%' + search + '%')}`
+      : ''
     const topics = req.query.topics ? req.query.topics.split(',') : []
 
     const following = req.userId ? req.query.following === 'true' : false
@@ -111,7 +80,9 @@ router.get('/', tokenMiddleware, async (req, res) => {
     }
     const authorQuery = followingUserIds.length
       ? `userId IN (${followingUserIds.map((userId) => `${userId}`).join(', ')})`
-      : ''
+      : following
+        ? 'userId IN []'
+        : ''
 
     let whereQuery = [searchQuery, topicQuery, authorQuery]
       .filter((query) => query)
@@ -152,7 +123,7 @@ router.get('/', tokenMiddleware, async (req, res) => {
           if (err) {
             reject(err)
           } else {
-            resolve(results)
+            resolve(results.map((user) => ({ ...user, password: undefined })))
           }
         },
       )
@@ -220,7 +191,10 @@ router.get('/:id', async (req, res) => {
           if (err) {
             reject(err)
           } else {
-            resolve(results[0])
+            resolve({
+              ...results[0],
+              password: undefined,
+            })
           }
         },
       )
@@ -298,7 +272,7 @@ router.get('/:id/comments', tokenMiddleware, async (req, res) => {
             if (err) {
               reject(err)
             } else {
-              resolve(results)
+              resolve(results.map((user) => ({ ...user, password: undefined })))
             }
           },
         )
