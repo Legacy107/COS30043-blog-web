@@ -37,6 +37,7 @@
               variant="plain"
               @click="copyLink"
               slim
+              aria-label="Copy link"
             >
               <v-icon>mdi-content-copy</v-icon>
               <v-tooltip activator="parent" location="top">

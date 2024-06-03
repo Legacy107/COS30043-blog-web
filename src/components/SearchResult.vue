@@ -7,7 +7,7 @@
     </template>
 
     <template v-else>
-      <v-list density="comfortable">
+      <v-list density="comfortable" aria-label="Post result">
         <v-list-subheader class="font-weight-black">Post</v-list-subheader>
 
         <template v-if="posts.length">
@@ -26,6 +26,7 @@
             variant="plain"
             append-icon="mdi-arrow-right"
             :href="`/?search=${searchQuery}`"
+            aria-label="View all post"
           >
             View all post
           </v-btn>
@@ -39,7 +40,7 @@
         </template>
       </v-list>
 
-      <v-list>
+      <v-list aria-label="User result">
         <v-list-subheader class="font-weight-black">People</v-list-subheader>
 
         <template v-if="users.length">
@@ -83,7 +84,7 @@
         </template>
       </v-list>
 
-      <v-list density="comfortable">
+      <v-list density="comfortable" aria-label="Topic result">
         <v-list-subheader class="font-weight-black">Topics</v-list-subheader>
 
         <template v-if="topics.length">
@@ -92,7 +93,7 @@
             :key="i"
             :value="topic"
             color="primary"
-            :href="`/?topic=${topic.name}`"
+            :href="`/?topics=${topic.name}`"
           >
             <v-list-item-title>{{ topic.name }}</v-list-item-title>
           </v-list-item>

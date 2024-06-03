@@ -18,7 +18,6 @@
         placeholder="Search"
         center-affix
         density="compact"
-        flat
         hide-details
         variant="outlined"
       >
@@ -41,7 +40,9 @@
           :href="item.link"
           class="text-decoration-none d-none d-sm-block"
         >
-          <v-btn :color="item.color">{{ item.title }}</v-btn>
+          <v-btn :color="item.color" :aria-label="item.title">
+            {{ item.title }}
+          </v-btn>
         </a>
 
         <v-fade-transition hide-on-leave>
@@ -70,10 +71,18 @@
         </v-fade-transition>
 
         <div class="d-sm-none min-width-100">
-          <v-btn icon="mdi-magnify" v-on:click="openSearch"></v-btn>
+          <v-btn
+            icon="mdi-magnify"
+            v-on:click="openSearch"
+            aria-label="Search"
+          />
           <v-menu transition="fade-transition">
             <template v-slot:activator="{ props }">
-              <v-btn v-bind="props" icon="mdi-dots-vertical"></v-btn>
+              <v-btn
+                v-bind="props"
+                icon="mdi-dots-vertical"
+                aria-label="Menu"
+              />
             </template>
             <v-list>
               <a
@@ -109,10 +118,12 @@ import { User } from '@/@types/user'
 import { Topic } from '@/@types/topic'
 
 const publicMenu = [
+  { title: 'Home', link: '/', color: 'white' },
   { title: 'Sign In', link: '/auth/login', color: 'white' },
   { title: 'Get Started', link: '/auth/signup', color: 'primary' },
 ]
 const privateMenu = (id: string) => [
+  { title: 'Home', link: '/', color: 'white' },
   { title: 'Profile', link: `/user/${id}`, color: 'white' },
   { title: 'New Post', link: '/post/create', color: 'primary' },
 ]
@@ -152,18 +163,30 @@ export default {
       this.expandSearch = !this.expandSearch
     },
     async fetchSearchPosts() {
-      const { data } = await axios.get(
-        `/post?search=${this.search}&limit=5&sort=Newest`,
-      )
-      this.searchPosts = data.posts
+      try {
+        const { data } = await axios.get(
+          `/post?search=${this.search}&limit=5&sort=Newest`,
+        )
+        this.searchPosts = data.posts
+      } catch (error) {
+        console.error(error)
+      }
     },
     async fetchSearchTopics() {
-      const { data } = await axios.get(`/topic?search=${this.search}&limit=5`)
-      this.searchTopics = data
+      try {
+        const { data } = await axios.get(`/topic?search=${this.search}&limit=5`)
+        this.searchTopics = data
+      } catch (error) {
+        console.error(error)
+      }
     },
     async fetchSearchUsers() {
-      const { data } = await axios.get(`/user?search=${this.search}&limit=5`)
-      this.searchUsers = data
+      try {
+        const { data } = await axios.get(`/user?search=${this.search}&limit=5`)
+        this.searchUsers = data
+      } catch (error) {
+        console.error(error)
+      }
     },
     async handleSearch() {
       if (this.search.length < 2) {

@@ -44,7 +44,12 @@
               </v-col>
 
               <v-col class="d-flex justify-end">
-                <v-btn color="primary" type="submit" :loading="loading">
+                <v-btn
+                  color="primary"
+                  type="submit"
+                  :loading="loading"
+                  aria-label="Save"
+                >
                   Save
                 </v-btn>
               </v-col>

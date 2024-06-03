@@ -74,6 +74,7 @@
       color="primary"
       :loading="loading"
       class="align-self-end mt-4"
+      aria-label="Submit post"
     >
       {{ buttonText }}
     </v-btn>

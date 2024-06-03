@@ -2,7 +2,12 @@
   <div class="w-100 mb-8">
     <div>
       <div class="text-h5 mb-2 font-weight-bold">Trending Posts</div>
-      <v-list lines="two" density="comfortable" bg-color="transparent">
+      <v-list
+        lines="two"
+        density="comfortable"
+        bg-color="transparent"
+        aria-label="Trending Posts"
+      >
         <v-list-item v-for="post in trendingPosts" :key="post.id" class="ps-0">
           <v-hover>
             <template v-slot:default="{ isHovering, props }">
@@ -49,6 +54,7 @@
                     ? 'text-decoration-underline'
                     : 'text-decoration-none')
                 "
+                aria-label="View post"
               >
                 <div class="mt-1 text-h7 font-weight-black">
                   {{ post.title }}
@@ -79,7 +85,13 @@
 
     <div v-if="authenticated">
       <div class="text-h5 mb-2 font-weight-bold">Recommended Authors</div>
-      <v-list density="compact" bg-color="transparent" slim lines="three">
+      <v-list
+        density="compact"
+        bg-color="transparent"
+        slim
+        lines="three"
+        aria-label="Recommended Authors"
+      >
         <v-list-item
           v-for="recommendedUser in recommendedAuthors"
           :key="recommendedUser.id"
@@ -139,6 +151,7 @@
                 size="small"
                 class="align-self-center"
                 @click="() => unfollowUser(recommendedUser)"
+                aria-label="Unfollow"
               >
                 <span class="d-none d-md-block">Following</span>
                 <v-icon class="d-md-none">mdi-account-check</v-icon>
@@ -150,6 +163,7 @@
                 size="small"
                 class="align-self-center"
                 @click="() => followUser(recommendedUser)"
+                aria-label="Follow"
               >
                 <span class="d-none d-md-block">Follow</span>
                 <v-icon class="d-md-none">mdi-account-plus</v-icon>
@@ -195,6 +209,7 @@ export default {
     },
     async fetchRecommendedTopics() {
       try {
+        if (!this.authenticated) return
         const { data } = await axios.get('/recommendation/topics')
         this.recommendedTopics = data
       } catch (error) {
@@ -203,6 +218,7 @@ export default {
     },
     async fetchRecommendedAuthors() {
       try {
+        if (!this.authenticated) return
         const { data } = await axios.get('/recommendation/users')
         this.recommendedAuthors = data
       } catch (error) {

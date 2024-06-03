@@ -11,7 +11,7 @@
       />
     </v-col>
 
-    <v-col cols="12" md="6">
+    <v-col cols="12" :md="!authenticated ? '9' : '6'">
       <v-autocomplete
         v-model="topics"
         :items="availableTopics"

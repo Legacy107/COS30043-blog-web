@@ -26,19 +26,33 @@ export const useAppStore = defineStore('app', {
       Cookies.remove('user')
     },
     async fetchFollowing() {
-      if (!this.user) return
-      const { data } = await axios.get(`/user/${this.user?.id}/following`)
-      this.followingUsers = data
+      try {
+        if (!this.user) return
+        const { data } = await axios.get(`/user/${this.user?.id}/following`)
+        this.followingUsers = data
+      } catch (error) {
+        console.error(error)
+      }
     },
     async followUser(user: User) {
-      if (!this.user) return
-      await axios.post(`/user/${user.id}/follow`)
-      this.followingUsers.push(user)
+      try {
+        if (!this.user) return
+        await axios.post(`/user/${user.id}/follow`)
+        this.followingUsers.push(user)
+      } catch (error) {
+        console.error(error)
+      }
     },
     async unfollowUser(user: User) {
-      if (!this.user) return
-      await axios.delete(`/user/${user.id}/follow`)
-      this.followingUsers = this.followingUsers.filter((u) => u.id !== user.id)
+      try {
+        if (!this.user) return
+        await axios.delete(`/user/${user.id}/follow`)
+        this.followingUsers = this.followingUsers.filter(
+          (u) => u.id !== user.id,
+        )
+      } catch (error) {
+        console.error(error)
+      }
     },
     isFollowing(user: User) {
       return this.followingUsers.some((u) => u.id === user.id)

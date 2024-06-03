@@ -1,6 +1,11 @@
 <template>
   <div class="d-flex align-center">
-    <v-btn variant="plain" :prepend-icon="likeIcon" @click="onLike">
+    <v-btn
+      variant="plain"
+      :prepend-icon="likeIcon"
+      @click="onLike"
+      aria-label="Like"
+    >
       {{ noLikes }}
       <v-tooltip activator="parent" location="top">Like</v-tooltip>
     </v-btn>
@@ -8,6 +13,7 @@
       variant="plain"
       prepend-icon="mdi-comment-outline"
       @click="onOpenComments"
+      aria-label="Comment"
     >
       {{ noComments }}
       <v-tooltip activator="parent" location="top">Comment</v-tooltip>
@@ -16,7 +22,7 @@
       <v-icon>mdi-bookmark-plus-outline</v-icon>
       <v-tooltip activator="parent" location="top">Save</v-tooltip>
     </v-btn> -->
-    <v-btn variant="plain" icon class="ms-auto">
+    <v-btn variant="plain" icon class="ms-auto" aria-label="Share">
       <v-icon>mdi-share-variant</v-icon>
       <v-tooltip activator="parent" location="top">Share</v-tooltip>
       <ShareModal :url="shareUrl" :title="shareTitle" />

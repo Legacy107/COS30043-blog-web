@@ -74,7 +74,7 @@
                 rounded
                 size="175"
               >
-                <v-img :src="post.image"></v-img>
+                <v-img :src="post.image" :alt="'thumbnail for ' + post.title" />
               </v-avatar>
               <v-img
                 :src="post.image ?? ''"

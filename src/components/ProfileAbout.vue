@@ -23,6 +23,7 @@
               v-if="isFollowing(userProfile)"
               color="primary"
               @click="() => handleUnfollowUser(userProfile)"
+              aria-label="Unfollow"
             >
               Following
             </v-btn>
@@ -31,13 +32,18 @@
               color="primary"
               variant="outlined"
               @click="() => handleFollowUser(userProfile)"
+              aria-label="Follow"
             >
               Follow
             </v-btn>
           </template>
 
           <template v-else>
-            <v-btn color="primary" @click="openEdit = true">
+            <v-btn
+              color="primary"
+              @click="openEdit = true"
+              aria-label="Edit Profile"
+            >
               Edit Profile
               <ProfileEditDialog
                 v-model:open="openEdit"
@@ -54,7 +60,12 @@
     </v-row>
     <div v-if="following.length" class="mt-10">
       <div class="text-h6">Following</div>
-      <v-list density="compact" bg-color="transparent" slim>
+      <v-list
+        density="compact"
+        bg-color="transparent"
+        slim
+        aria-label="Following list"
+      >
         <v-hover v-for="followingUser in following" :key="followingUser.id">
           <template v-slot:default="{ isHovering, props }">
             <v-list-item
@@ -112,8 +123,8 @@
                       variant="text"
                       v-bind="props"
                       class="text-decoration-none"
-                    >
-                    </v-btn>
+                      aria-label="More actions"
+                    />
                   </template>
                   <v-card
                     :title="`${followingUser.firstname} ${followingUser.lastname}`"
@@ -152,6 +163,7 @@
                             @click="
                               () => handleUnfollowUserFromList(followingUser)
                             "
+                            aria-label="Unfollow"
                           >
                             Following
                           </v-btn>
@@ -163,6 +175,7 @@
                             @click="
                               () => handleFollowUserFromList(followingUser)
                             "
+                            aria-label="Follow"
                           >
                             Follow
                           </v-btn>
@@ -263,19 +276,23 @@ export default defineComponent({
       }
     },
     async handleEditProfile() {
-      const formData = new FormData()
-      formData.append('firstname', this.editProfile.firstname)
-      formData.append('lastname', this.editProfile.lastname)
-      formData.append('bio', this.editProfile.bio)
-      if (this.editProfile.avatar.length > 0)
-        formData.append('avatar', this.editProfile.avatar[0])
+      try {
+        const formData = new FormData()
+        formData.append('firstname', this.editProfile.firstname)
+        formData.append('lastname', this.editProfile.lastname)
+        formData.append('bio', this.editProfile.bio)
+        if (this.editProfile.avatar.length > 0)
+          formData.append('avatar', this.editProfile.avatar[0])
 
-      const { data } = await axios.put('/user', formData)
-      this.setUser({
-        ...this.user,
-        ...data,
-      })
-      this.updateUser()
+        const { data } = await axios.put('/user', formData)
+        this.setUser({
+          ...this.user,
+          ...data,
+        })
+        this.updateUser()
+      } catch (error) {
+        console.error(error)
+      }
     },
     ...mapActions(useAppStore, [
       'setUser',

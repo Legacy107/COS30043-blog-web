@@ -13,7 +13,7 @@
           flat
           variant="outlined"
           required
-        ></v-text-field>
+        />
         <v-text-field
           v-model="lastName"
           label="Last Name"
@@ -21,7 +21,7 @@
           flat
           variant="outlined"
           required
-        ></v-text-field>
+        />
         <v-text-field
           v-model="username"
           label="Username"
@@ -29,7 +29,7 @@
           flat
           variant="outlined"
           required
-        ></v-text-field>
+        />
         <v-text-field
           v-model="password"
           label="Password"
@@ -38,7 +38,7 @@
           flat
           variant="outlined"
           required
-        ></v-text-field>
+        />
         <v-text-field
           v-model="retypePassword"
           label="Confirm Password"
@@ -47,13 +47,14 @@
           flat
           variant="outlined"
           required
-        ></v-text-field>
+        />
         <v-btn
           :loading="loading"
           type="submit"
           color="primary"
           class="w-100"
           block
+          aria-label="Sign Up"
         >
           {{ loading ? 'Signing Up...' : 'Sign Up' }}
         </v-btn>

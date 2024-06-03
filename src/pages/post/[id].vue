@@ -45,6 +45,7 @@
             color="primary"
             :variant="followButtonVariant"
             @click="handleFollow"
+            aria-label="Follow"
           >
             {{ followText }}
           </v-btn>
@@ -184,6 +185,7 @@ export default {
     },
     async fetchLikeStatus() {
       try {
+        if (!this.user) return
         const { data } = await axios.get(`/post/${this.id}/like`)
         this.isLiked = data.like
       } catch (error) {
@@ -191,21 +193,33 @@ export default {
       }
     },
     async fetchFollowing() {
-      if (!this.user) return
-      const { data } = await axios.get(`/user/${this.user?.id}/following`)
-      if (data.some((u: User) => u.id === this.post?.author.id)) {
-        this.isFollowing = true
+      try {
+        if (!this.user) return
+        const { data } = await axios.get(`/user/${this.user?.id}/following`)
+        if (data.some((u: User) => u.id === this.post?.author.id)) {
+          this.isFollowing = true
+        }
+      } catch (error) {
+        console.error(error)
       }
     },
     async followUser() {
-      if (!this.post?.author) return
-      await axios.post(`/user/${this.post.author.id}/follow`)
-      this.isFollowing = true
+      try {
+        if (!this.post?.author) return
+        await axios.post(`/user/${this.post.author.id}/follow`)
+        this.isFollowing = true
+      } catch (error) {
+        console.error(error)
+      }
     },
     async unfollowUser() {
-      if (!this.post?.author) return
-      await axios.delete(`/user/${this.post.author.id}/follow`)
-      this.isFollowing = false
+      try {
+        if (!this.post?.author) return
+        await axios.delete(`/user/${this.post.author.id}/follow`)
+        this.isFollowing = false
+      } catch (error) {
+        console.error(error)
+      }
     },
     handleFollow() {
       if (this.isFollowing) {
@@ -229,12 +243,16 @@ export default {
     ...mapState(useAppStore, ['user']),
   },
   async mounted() {
-    const { id } = this.$route.params as unknown as { id: string }
-    const { data } = await axios.get(`/post/${id}`)
-    this.post = data
+    try {
+      const { id } = this.$route.params as unknown as { id: string }
+      const { data } = await axios.get(`/post/${id}`)
+      this.post = data
 
-    this.fetchFollowing()
-    this.fetchLikeStatus()
+      this.fetchFollowing()
+      this.fetchLikeStatus()
+    } catch (error) {
+      console.error(error)
+    }
   },
 }
 </script>

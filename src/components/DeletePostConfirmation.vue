@@ -9,8 +9,16 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="primary" text @click="handleClose">Cancel</v-btn>
-        <v-btn color="error" text @click="confirmDelete" :loading="loading">
+        <v-btn color="primary" text @click="handleClose" aria-label="Cancel">
+          Cancel
+        </v-btn>
+        <v-btn
+          color="error"
+          text
+          @click="confirmDelete"
+          :loading="loading"
+          aria-label="Delete"
+        >
           Delete
         </v-btn>
       </v-card-actions>

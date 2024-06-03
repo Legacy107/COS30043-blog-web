@@ -62,12 +62,14 @@
                           class="mb-2"
                           color="error"
                           @click="() => handleOpenDeleteDialog(post.id)"
+                          aria-label="Delete"
                         />
                         <v-btn
                           :to="`/post/${post.id}/edit`"
                           icon="mdi-pencil"
                           class="mb-2"
                           color="primary"
+                          aria-label="Edit"
                         />
                       </div>
                     </v-fade-transition>
@@ -159,13 +161,22 @@ export default {
         })
     },
     async fetchUser(id: number): Promise<User> {
-      const { data } = await axios.get(`/user/${id}`)
-      this.user = data
-      return data
+      try {
+        const { data } = await axios.get(`/user/${id}`)
+        this.user = data
+        return data
+      } catch (error) {
+        console.error(error)
+        return {} as User
+      }
     },
     async fetchFollowing(id: number) {
-      const { data } = await axios.get(`/user/${id}/following`)
-      this.following = data
+      try {
+        const { data } = await axios.get(`/user/${id}/following`)
+        this.following = data
+      } catch (error) {
+        console.error(error)
+      }
     },
     async fetchData(id: number) {
       this.fetchUser(id)

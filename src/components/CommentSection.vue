@@ -12,7 +12,13 @@
         :rules="commentRules"
         validate-on="submit"
       />
-      <v-btn color="primary" class="mb-6" type="submit" :loading="loading">
+      <v-btn
+        color="primary"
+        class="mb-6"
+        type="submit"
+        :loading="loading"
+        aria-label="Submit"
+      >
         Submit
       </v-btn>
     </v-form>
@@ -67,6 +73,7 @@
             :prepend-icon="comment.liked ? 'mdi-heart' : 'mdi-heart-outline'"
             class="px-0"
             @click="() => handleLikeComment(comment)"
+            aria-label="Like"
           >
             {{ comment.likes }}
             <v-tooltip activator="parent" location="bottom">

@@ -16,7 +16,7 @@
           variant="outlined"
           autocomplete="username"
           @input="errorMessage = ''"
-        ></v-text-field>
+        />
         <v-text-field
           v-model="password"
           label="Password"
@@ -28,10 +28,16 @@
           variant="outlined"
           autocomplete="current-password"
           @input="errorMessage = ''"
-        ></v-text-field>
-        <v-btn :loading="loading" type="submit" color="primary" block
-          >Login</v-btn
+        />
+        <v-btn
+          :loading="loading"
+          type="submit"
+          color="primary"
+          block
+          aria-label="Login"
         >
+          Login
+        </v-btn>
         <a
           href="/auth/signup"
           class="text-decoration-none text-primary text-center mt-3"

@@ -1,7 +1,7 @@
 <template>
   <v-menu v-if="!!user" transition="fade-transition">
     <template v-slot:activator="{ props }">
-      <v-btn icon v-bind="props">
+      <v-btn icon v-bind="props" aria-label="User Menu">
         <v-avatar size="36" color="primary">
           <v-img v-if="user.avatar" :src="user.avatar" :alt="user.firstname" />
           <span v-else class="text-h5">
